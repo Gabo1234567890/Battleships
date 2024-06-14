@@ -427,12 +427,13 @@ void setAllShips(char **board)
     setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
 }
 
-int hitShip(char **board, int x, int y, int hits)
+int hitShip(char **board, int x, int y, int hits, int *i)
 {
     if(board[x][y] == SHIP_SIGN)
     {
         printf("\nYou hit a ship!\n");
         board[x][y] = HIT_SHIP_SIGN;
+        i--;
         hits++;
     }
     else
@@ -462,12 +463,12 @@ void gamePvsP(char **board1, char **board2)
         if(i % 2 == 1)
         {
             printf("\nPlayer 1:\n");
-            hits1 = hitShip(board1, s.x, s.y, hits1);
+            hits1 = hitShip(board1, s.x, s.y, hits1, i);
         }
         else
         {
             printf("\nPlayer 2:\n");
-            hits2 = hitShip(board2, s.x, s.y, hits2);
+            hits2 = hitShip(board2, s.x, s.y, hits2, i);
         }
         if(hits1 == countShipSighs())
         {
