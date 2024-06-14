@@ -20,7 +20,7 @@
 #define SHIP_SIGN '#'
 #define SEA_SIGN '~'
 #define MISSED_SHIP_SIGN 'x'
-#define HITTED_SHIP '@'
+#define HIT_SHIP_SIGN '@'
 
 typedef struct Ship
 {
@@ -432,7 +432,7 @@ int hitShip(char **board, int x, int y, int hits)
     if(board[x][y] == SHIP_SIGN)
     {
         printf("\nYou hit a ship!\n");
-        board[x][y] = HITTED_SHIP;
+        board[x][y] = HIT_SHIP_SIGN;
         hits++;
     }
     else
