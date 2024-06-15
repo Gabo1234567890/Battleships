@@ -21,12 +21,18 @@
 #define SHIP_SIGN '#'
 #define SEA_SIGN '~'
 #define MISSED_SHIP_SIGN 'x'
-#define HIT_SHIP_SIGN '@'
+#define HIT_SHIP_SIGN 'O'
+#define DESTROYED_SHIP_SIGN '@'
 
-typedef struct Ship
+typedef struct Point
 {
     int x;
     int y;
+} Point;
+
+typedef struct Ship
+{
+    Point p;
     char direction;
 } Ship;
 
@@ -84,8 +90,8 @@ void setShip(char **board, Ship s, int shipLength)
     {
         for (int i = 0; i < shipLength; i++)
         {
-            board[s.x][s.y] = SHIP_SIGN;
-            s.x--;
+            board[s.p.x][s.p.y] = SHIP_SIGN;
+            s.p.x--;
         }
         return;
     }
@@ -93,8 +99,8 @@ void setShip(char **board, Ship s, int shipLength)
     {
         for (int i = 0; i < shipLength; i++)
         {
-            board[s.x][s.y] = SHIP_SIGN;
-            s.x++;
+            board[s.p.x][s.p.y] = SHIP_SIGN;
+            s.p.x++;
         }
         return;
     }
@@ -102,8 +108,8 @@ void setShip(char **board, Ship s, int shipLength)
     {
         for (int i = 0; i < shipLength; i++)
         {
-            board[s.x][s.y] = SHIP_SIGN;
-            s.y++;
+            board[s.p.x][s.p.y] = SHIP_SIGN;
+            s.p.y++;
         }
         return;
     }
@@ -111,40 +117,42 @@ void setShip(char **board, Ship s, int shipLength)
     {
         for (int i = 0; i < shipLength; i++)
         {
-            board[s.x][s.y] = SHIP_SIGN;
-            s.y--;
+            board[s.p.x][s.p.y] = SHIP_SIGN;
+            s.p.y--;
         }
         return;
     }
 }
 
 // WORKS
-bool isWithinBoard(int x, int y)
+bool isWithinBoard(Point p)
 {
-    return (x >= 0 && x < BOARD_SIDE_SIZE && y >= 0 && y < BOARD_SIDE_SIZE);
+    return (p.x >= 0 && p.x < BOARD_SIDE_SIZE && p.y >= 0 && p.y < BOARD_SIDE_SIZE);
 }
 
 // WORKS
-bool isValidPlacement(char **board, int x, int y, int shipLength, bool horizontal)
+bool isValidPlacement(char **board, Point p, int shipLength, bool horizontal)
 {
     int xOffset[] = {-1, 1, 0, 0, -1, -1, 1, 1};
     int yOffset[] = {0, 0, 1, -1, 1, -1, 1, -1};
     for (int i = 0; i < shipLength; i++)
     {
-        int currentX = horizontal ? x : x + i;
-        int currentY = horizontal ? y + i : y;
+        Point current;
+        current.x = horizontal ? p.x : p.x + i;
+        current.y = horizontal ? p.y + i : p.y;
 
-        if (!isWithinBoard(currentX, currentY) || board[currentX][currentY] == SHIP_SIGN)
+        if (isWithinBoard(current) && board[current.x][current.y] == SHIP_SIGN)
         {
             return false;
         }
 
         for (int j = 0; j < 8; j++)
         {
-            int adjacentX = currentX + xOffset[j];
-            int adjacentY = currentY + yOffset[j];
+            Point adjacent;
+            adjacent.x = current.x + xOffset[j];
+            adjacent.y = current.y + yOffset[j];
 
-            if (isWithinBoard(adjacentX, adjacentY) && board[adjacentX][adjacentY] == SHIP_SIGN)
+            if (isWithinBoard(adjacent) && board[adjacent.x][adjacent.y] == SHIP_SIGN)
             {
                 return false;
             }
@@ -157,36 +165,36 @@ bool isValidPlacement(char **board, int x, int y, int shipLength, bool horizonta
 int checkDirection(char **board, Ship s, int shipLength)
 {
     bool res = true;
-    if (s.direction == 'u' && s.x - shipLength + 1 >= 0)
+    if (s.direction == 'u' && s.p.x - shipLength + 1 >= 0)
     {
-        res = isValidPlacement(board, s.x, s.y, shipLength, false);
+        res = isValidPlacement(board, s.p, shipLength, false);
         if (res == false)
         {
             return -1;
         }
         return 1;
     }
-    if (s.direction == 'd' && s.x + shipLength - 1 <= BOARD_SIDE_SIZE - 1)
+    if (s.direction == 'd' && s.p.x + shipLength - 1 <= BOARD_SIDE_SIZE - 1)
     {
-        res = isValidPlacement(board, s.x, s.y, shipLength, false);
+        res = isValidPlacement(board, s.p, shipLength, false);
         if (res == false)
         {
             return -2;
         }
         return 1;
     }
-    if (s.direction == 'l' && s.y - shipLength + 1 >= 0)
+    if (s.direction == 'l' && s.p.y - shipLength + 1 >= 0)
     {
-        res = isValidPlacement(board, s.x, s.y, shipLength, true);
+        res = isValidPlacement(board, s.p, shipLength, true);
         if (res == false)
         {
             return -2;
         }
         return 1;
     }
-    if (s.direction == 'r' && s.y + shipLength - 1 <= BOARD_SIDE_SIZE - 1)
+    if (s.direction == 'r' && s.p.y + shipLength - 1 <= BOARD_SIDE_SIZE - 1)
     {
-        res = isValidPlacement(board, s.x, s.y, shipLength, true);
+        res = isValidPlacement(board, s.p, shipLength, true);
         if (res == false)
         {
             return -2;
@@ -198,90 +206,98 @@ int checkDirection(char **board, Ship s, int shipLength)
 }
 
 // WORKS
-void enterCoordinates(Ship *s)
+void enterCoordinates(Point *p)
 {
-    s->x = -1;
-    s->y = -1;
-    s->direction = '-';
-    while (!isWithinBoard(s->x, s->y))
+    p->x = -1;
+    p->y = -1;
+    Point newP;
+    newP.x = p->x;
+    newP.y = p->y;
+    while (!isWithinBoard(newP))
     {
         printf("Enter x: ");
-        scanf("%d", &s->x);
+        scanf("%d", &p->x);
         getchar();
         printf("Enter y: ");
-        scanf("%d", &s->y);
+        scanf("%d", &p->y);
         getchar();
     }
 }
 
 // WORKS
-int removeShip(char **board, Ship s)
+int removeShip(char **board, Point p)
 {
     int shipLength = 0;
-    int x = s.x;
-    int y = s.y;
-
-    x--;
-    while (isWithinBoard(x, y))
+    Point newP;
+    newP.x = p.x;
+    newP.y = p.y;
+    if (isWithinBoard(newP) && board[newP.x][newP.y] == SHIP_SIGN)
     {
-        if (board[x][y] == SHIP_SIGN)
-        {
-            board[x][y] = SEA_SIGN;
-            shipLength++;
-        }
-        else
-        {
-            break;
-        }
-        x--;
+        board[newP.x][newP.y] = SEA_SIGN;
+        shipLength++;
     }
 
-    x = s.x++;
-    y = s.y;
-    while (isWithinBoard(x, y))
+    newP.x = p.x - 1;
+    while (isWithinBoard(newP))
     {
-        if (board[x][y] == SHIP_SIGN)
+        if (board[newP.x][newP.y] == SHIP_SIGN)
         {
-            board[x][y] = SEA_SIGN;
+            board[newP.x][newP.y] = SEA_SIGN;
             shipLength++;
         }
         else
         {
             break;
         }
-        x++;
+        newP.x--;
     }
 
-    x = s.x;
-    y = s.y++;
-    while (isWithinBoard(x, y))
+    newP.x = p.x + 1;
+    newP.y = p.y;
+    while (isWithinBoard(newP))
     {
-        if (board[x][y] == SHIP_SIGN)
+        if (board[newP.x][newP.y] == SHIP_SIGN)
         {
-            board[x][y] = SEA_SIGN;
+            board[newP.x][newP.y] = SEA_SIGN;
             shipLength++;
         }
         else
         {
             break;
         }
-        y++;
+        newP.x++;
     }
 
-    x = s.x;
-    y = s.y--;
-    while (isWithinBoard(x, y))
+    newP.x = p.x;
+    newP.y = p.y + 1;
+    while (isWithinBoard(newP))
     {
-        if (board[x][y] == SHIP_SIGN)
+        if (board[newP.x][newP.y] == SHIP_SIGN)
         {
-            board[x][y] = SEA_SIGN;
+            board[newP.x][newP.y] = SEA_SIGN;
             shipLength++;
         }
         else
         {
             break;
         }
-        y--;
+        newP.y++;
+    }
+
+    newP.x = p.x;
+    newP.y = p.y - 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            board[newP.x][newP.y] = SEA_SIGN;
+            shipLength++;
+        }
+        else
+        {
+            break;
+        }
+        newP.y--;
     }
 
     return shipLength;
@@ -290,12 +306,11 @@ int removeShip(char **board, Ship s)
 // WORKS
 bool moveShip(char **board, Ship s1, Ship s2)
 {
-    int shipLength = removeShip(board, s1);
-    if (shipLength == -1)
+    int shipLength = removeShip(board, s1.p);
+    if (shipLength == 0)
     {
         return false;
     }
-    printf("moveShip\n");
 
     int dRes = checkDirection(board, s2, shipLength);
     if (dRes == -1)
@@ -321,25 +336,25 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
     for (int i = 0; i < numberOfShips; i++)
     {
         printf("\nShip %d:\n", i + 1);
-        s.x = -1;
-        s.y = -1;
+        s.p.x = -1;
+        s.p.y = -1;
         s.direction = '-';
         printBoard(board);
-        while (s.x < 0 || s.x > BOARD_SIDE_SIZE - 1)
+        while (s.p.x < 0 || s.p.x > BOARD_SIDE_SIZE - 1)
         {
             printf("Enter start x: \n");
             printf("x must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
             printf("x: ");
-            scanf("%d", &s.x);
+            scanf("%d", &s.p.x);
             getchar();
         }
 
-        while (s.y < 0 || s.y > BOARD_SIDE_SIZE - 1)
+        while (s.p.y < 0 || s.p.y > BOARD_SIDE_SIZE - 1)
         {
             printf("Enter start y: \n");
             printf("y must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
             printf("y: ");
-            scanf("%d", &s.y);
+            scanf("%d", &s.p.y);
             getchar();
         }
 
@@ -370,36 +385,43 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
             setShip(board, s, shipLength);
         }
 
-        char choice = 'y';
+        char choice = '-';
 
         while (direction != -1 && direction != -2)
         {
             system("cls");
             printBoard(board);
-            printf("Do you want to move a ship? (yes - y, no - n)\n");
-            scanf("%c", &choice);
-            getchar();
+            while (choice != 'y' && choice != 'n')
+            {
+                printf("Do you want to move a ship? (yes - y, no - n)\n");
+                scanf("%c", &choice);
+                getchar();
+            }
             if (choice == 'n')
             {
                 break;
             }
+            choice = '-';
             Ship s1;
             while (1)
             {
                 printf("The ship you want to move:\n");
-                enterCoordinates(&s1);
-                if (board[s1.x][s1.y] != SHIP_SIGN)
+                enterCoordinates(&s1.p);
+                if (board[s1.p.x][s1.p.y] != SHIP_SIGN)
                 {
                     printf("\nThere is no ship!\n\n");
                 }
-                break;
+                else
+                {
+                    break;
+                }
             }
-            printf("New place of this ship:\n");
             bool place = false;
             while (place == false)
             {
+                printf("New place of this ship:\n");
                 Ship s2;
-                enterCoordinates(&s2);
+                enterCoordinates(&s2.p);
                 printf("Enter direction: ");
                 scanf("%c", &s2.direction);
                 getchar();
@@ -421,29 +443,32 @@ void setAllShips(char **board)
     printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
     setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH);
 
-    printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-    setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
+    // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
 
-    printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-    setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
+    // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
 
-    printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
-    setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
+    // printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
 }
 
-int hitShip(char **board, int x, int y, int hits, int *i)
+// WORK
+int isHitShip(char **sea, char **board, Point p, int hits, int *i)
 {
-    if (board[x][y] == SHIP_SIGN)
+    if (board[p.x][p.y] == SHIP_SIGN)
     {
         printf("\nYou hit a ship!\n");
-        board[x][y] = HIT_SHIP_SIGN;
+        sea[p.x][p.y] = HIT_SHIP_SIGN;
+        board[p.x][p.y] = HIT_SHIP_SIGN;
         i--;
         hits++;
     }
     else
     {
         printf("\nYou missed it!\n");
-        board[x][y] = MISSED_SHIP_SIGN;
+        sea[p.x][p.y] = MISSED_SHIP_SIGN;
+        board[p.x][p.y] = MISSED_SHIP_SIGN;
     }
     return hits;
 }
@@ -454,8 +479,113 @@ int countShipSigns()
 }
 
 // IN PROCESS
+void isShipDestroyed(char **board, Point p)
+{
+    Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
+    int size = 1;
+    Point newP;
+    newP.x = p.x;
+    newP.y = p.y;
+    bool destroyed = false;
+    if (isWithinBoard(newP) && board[newP.x][newP.y] == HIT_SHIP_SIGN)
+    {
+        destroyed = true;
+    }
+
+    newP.x = p.x - 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            destroyed = false;
+            break;
+        }
+        else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+        {
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            destroyed = true;
+        }
+        newP.x--;
+    }
+
+    newP.x = p.x + 1;
+    newP.y = p.y;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            destroyed = false;
+            break;
+        }
+        else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+        {
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            destroyed = true;
+        }
+        newP.x++;
+    }
+
+    newP.x = p.x;
+    newP.y = p.y + 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            destroyed = false;
+            break;
+        }
+        else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+        {
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            destroyed = true;
+        }
+        newP.y++;
+    }
+
+    newP.x = p.x;
+    newP.y = p.y - 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            destroyed = false;
+            break;
+        }
+        else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+        {
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            destroyed = true;
+        }
+        newP.y--;
+    }
+
+    if (destroyed == true)
+    {
+        for (int i = 0; i < size - 1; i++)
+        {
+            board[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
+        }
+        printf("\nYOU DESTROYED A SHIP!\n");
+    }
+}
+
+// IN PROCESS
 void gamePvsP(char **board1, char **board2)
 {
+    char **sea1 = setSea();
+    char **sea2 = setSea();
     bool end = true;
     Ship s;
     int i = 1;
@@ -463,25 +593,37 @@ void gamePvsP(char **board1, char **board2)
     int hits2 = 0;
     while (!end)
     {
-        enterCoordinates(&s);
+        enterCoordinates(&s.p);
         if (i % 2 == 1)
         {
-            printf("\nPlayer 1:\n");
-            hits1 = hitShip(board1, s.x, s.y, hits1, &i);
+            printf("\n------------PLAYER 1-----------\n");
+            printf("Enemy's board:\n");
+            printBoard(sea1);
+            printf("---------------------------------\n");
+            printf("Your board:\n");
+            printBoard(board1);
+            hits1 = isHitShip(sea1, board2, s.p, hits1, &i);
+            isShipDestroyed(board2, s.p);
         }
         else
         {
-            printf("\nPlayer 2:\n");
-            hits2 = hitShip(board2, s.x, s.y, hits2, &i);
+            printf("\n-------------PLAYER 2----------\n");
+            printf("Enemy's board:\n");
+            printBoard(sea2);
+            printf("---------------------------------\n");
+            printf("Your board:\n");
+            printBoard(board2);
+            hits2 = isHitShip(sea2, board1, s.p, hits2, &i);
+            isShipDestroyed(board1, s.p);
         }
         if (hits1 == countShipSigns())
         {
-            printf("\n---------PLAYER 1 WINS---------");
+            printf("\n---------PLAYER 1 WINS---------\n");
             return;
         }
         if (hits2 == countShipSigns())
         {
-            printf("\n---------PLAYER 2 WINS---------");
+            printf("\n---------PLAYER 2 WINS---------\n");
             return;
         }
         i++;
@@ -787,7 +929,12 @@ int main()
         switch (choice)
         {
         case 1:
-            printf("");
+            printf("--------------------------------------------------RULES----------------------------------------------------\n");
+            printf("Battleship is a game for two people where you have to sink all enemy^s ships.\n");
+            printf("Both players have to place their ships on board. Every ship is surrounded by water (even on the corners).\n");
+            printf("When all ships are placed the game begin. Every player gives a guess in which enemy^s sell has a ship.\n");
+            printf("The first player who finds all ships (whole ships) is the winner!\n");
+            printf("------------------------------------------------------------------------------------------------------------\n");
             break;
 
         case 2:
@@ -795,7 +942,7 @@ int main()
             setAllShips(board1);
             printf("Player 2 set ships:\n");
             setAllShips(board2);
-
+            gamePvsP(board1, board2);
             break;
 
         case 3:
