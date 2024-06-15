@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <windows.h>
+//#include <windows.h>
+// SYSTEM
+// SLEEP
 
 #define BOARD_SIDE_SIZE 10
 
@@ -20,8 +22,8 @@
 
 #define SHIP_SIGN '#'
 #define SEA_SIGN '~'
-#define MISSED_SHIP_SIGN 'x'
-#define HIT_SHIP_SIGN 'O'
+#define MISSED_SHIP_SIGN 'O'
+#define HIT_SHIP_SIGN 'X'
 #define DESTROYED_SHIP_SIGN '@'
 
 typedef struct Point
@@ -170,7 +172,7 @@ int checkDirection(char **board, Ship s, int shipLength)
         res = isValidPlacement(board, s.p, shipLength, false);
         if (res == false)
         {
-            return -1;
+            return -2;
         }
         return 1;
     }
@@ -210,15 +212,19 @@ void enterCoordinates(Point *p)
 {
     p->x = -1;
     p->y = -1;
-    Point newP;
-    newP.x = p->x;
-    newP.y = p->y;
-    while (!isWithinBoard(newP))
+    while (!isWithinBoardCoordinate(*p->x))
     {
-        printf("Enter x: ");
+        printf("Enter x:\n");
+        printf("x must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
+        printf("x: ");
         scanf("%d", &p->x);
         getchar();
-        printf("Enter y: ");
+    }
+    while (!isWithinBoardCoordinate(*p->y))
+    {
+        printf("Enter y:\n");
+        printf("y must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
+        printf("y: ");
         scanf("%d", &p->y);
         getchar();
     }
@@ -340,23 +346,7 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
         s.p.y = -1;
         s.direction = '-';
         printBoard(board);
-        while (s.p.x < 0 || s.p.x > BOARD_SIDE_SIZE - 1)
-        {
-            printf("Enter start x: \n");
-            printf("x must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
-            printf("x: ");
-            scanf("%d", &s.p.x);
-            getchar();
-        }
-
-        while (s.p.y < 0 || s.p.y > BOARD_SIDE_SIZE - 1)
-        {
-            printf("Enter start y: \n");
-            printf("y must be between 0 and %d\n", BOARD_SIDE_SIZE - 1);
-            printf("y: ");
-            scanf("%d", &s.p.y);
-            getchar();
-        }
+        enterCoordinates(&s.p);
 
         while (s.direction != 'u' && s.direction != 'd' && s.direction != 'l' && s.direction != 'r')
         {
@@ -372,13 +362,17 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
         {
             printf("Can't put ship there! You are out of the board!\n");
             i--;
-            Sleep(2000);
+            // SLEEP
+            sleep(2);
+            // Sleep(2000);
         }
         else if (direction == -2)
         {
             printf("\nThere is another ship next to this one! You can't put it here!\n");
             i--;
-            Sleep(2000);
+            // SLEEP
+            sleep(2);
+            // Sleep(2000);
         }
         else
         {
@@ -389,7 +383,9 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
 
         while (direction != -1 && direction != -2)
         {
-            system("cls");
+            // SYSTEM
+            system("clear");
+            // system("cls");
             printBoard(board);
             while (choice != 'y' && choice != 'n')
             {
@@ -422,6 +418,7 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
                 printf("New place of this ship:\n");
                 Ship s2;
                 enterCoordinates(&s2.p);
+                printf("The direction must be up - u, down - d, left - l, right - r!\n");
                 printf("Enter direction: ");
                 scanf("%c", &s2.direction);
                 getchar();
@@ -431,7 +428,9 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
                 }
             }
         }
-        system("cls");
+        // SYSTEM
+        system("clear");
+        // system("cls");
     }
 
     return board;
@@ -441,7 +440,7 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
 void setAllShips(char **board)
 {
     printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-    setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH);
+    setOneKindShips(board, 1, SMALL_SHIP_LENGTH);
 
     // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
     // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
@@ -453,33 +452,8 @@ void setAllShips(char **board)
     // setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
 }
 
-// WORK
-int isHitShip(char **sea, char **board, Point p, int hits, int *i)
-{
-    if (board[p.x][p.y] == SHIP_SIGN)
-    {
-        printf("\nYou hit a ship!\n");
-        sea[p.x][p.y] = HIT_SHIP_SIGN;
-        board[p.x][p.y] = HIT_SHIP_SIGN;
-        i--;
-        hits++;
-    }
-    else
-    {
-        printf("\nYou missed it!\n");
-        sea[p.x][p.y] = MISSED_SHIP_SIGN;
-        board[p.x][p.y] = MISSED_SHIP_SIGN;
-    }
-    return hits;
-}
-
-int countShipSigns()
-{
-    return NUMBER_OF_SMALL_SHIPS * SMALL_SHIP_LENGTH + NUMBER_OF_MID_SHIPS * MID_SHIP_LENGTH + NUMBER_OF_BIG_SHIPS * BIG_SHIP_LENGTH + NUMBER_OF_GIGA_SHIPS * GIGA_SHIP_LENGTH;
-}
-
-// IN PROCESS
-void isShipDestroyed(char **board, Point p)
+// WORKS
+bool isShipDestroyed(char** sea, char **board, Point p)
 {
     Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
     int size = 1;
@@ -490,6 +464,8 @@ void isShipDestroyed(char **board, Point p)
     if (isWithinBoard(newP) && board[newP.x][newP.y] == HIT_SHIP_SIGN)
     {
         destroyed = true;
+        wholeShipCoordinates[0].x = newP.x;
+        wholeShipCoordinates[0].y = newP.y;
     }
 
     newP.x = p.x - 1;
@@ -502,10 +478,11 @@ void isShipDestroyed(char **board, Point p)
         }
         else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
         {
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
         }
         newP.x--;
@@ -522,10 +499,11 @@ void isShipDestroyed(char **board, Point p)
         }
         else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
         {
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
         }
         newP.x++;
@@ -542,10 +520,11 @@ void isShipDestroyed(char **board, Point p)
         }
         else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
         {
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
         }
         newP.y++;
@@ -562,23 +541,54 @@ void isShipDestroyed(char **board, Point p)
         }
         else if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
         {
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
         }
         newP.y--;
     }
-
+    
     if (destroyed == true)
     {
-        for (int i = 0; i < size - 1; i++)
+        for (int i = 0; i < size; i++)
         {
+            sea[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
             board[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
         }
-        printf("\nYOU DESTROYED A SHIP!\n");
     }
+
+    return destroyed;
+}
+
+// WORK
+int isShipHit(char **sea, char **board, Point p, int hits, int *i)
+{
+    if (board[p.x][p.y] == SHIP_SIGN)
+    {
+        sea[p.x][p.y] = HIT_SHIP_SIGN;
+        board[p.x][p.y] = HIT_SHIP_SIGN;
+        (*i)--;
+        hits++;
+        if(isShipDestroyed(sea, board, p))
+        {
+            printf("DESTROYED SHIP\n");
+        }
+    }
+    else
+    {
+        sea[p.x][p.y] = MISSED_SHIP_SIGN;
+        board[p.x][p.y] = MISSED_SHIP_SIGN;
+    }
+
+    return hits;
+}
+
+int countShipSigns()
+{
+    return NUMBER_OF_SMALL_SHIPS * SMALL_SHIP_LENGTH + NUMBER_OF_MID_SHIPS * MID_SHIP_LENGTH + NUMBER_OF_BIG_SHIPS * BIG_SHIP_LENGTH + NUMBER_OF_GIGA_SHIPS * GIGA_SHIP_LENGTH;
 }
 
 // IN PROCESS
@@ -586,14 +596,14 @@ void gamePvsP(char **board1, char **board2)
 {
     char **sea1 = setSea();
     char **sea2 = setSea();
-    bool end = true;
-    Ship s;
+    bool end = false;
+    Point p;
     int i = 1;
     int hits1 = 0;
     int hits2 = 0;
+    printf("Let the game begin!\n");
     while (!end)
     {
-        enterCoordinates(&s.p);
         if (i % 2 == 1)
         {
             printf("\n------------PLAYER 1-----------\n");
@@ -602,23 +612,41 @@ void gamePvsP(char **board1, char **board2)
             printf("---------------------------------\n");
             printf("Your board:\n");
             printBoard(board1);
-            hits1 = isHitShip(sea1, board2, s.p, hits1, &i);
-            isShipDestroyed(board2, s.p);
+            enterCoordinates(&p);
+            int newHits1 = isShipHit(sea1, board2, p, hits1, &i);
+            if(hits1 < newHits1)
+            {
+                printf("You hit a ship!\n");
+            }
+            else
+            {
+                printf("You missed it!\n");
+            }
+            hits1 = newHits1;
         }
         else
         {
-            printf("\n-------------PLAYER 2----------\n");
+            printf("\n-------------PLAYER 2-----------\n");
             printf("Enemy's board:\n");
             printBoard(sea2);
             printf("---------------------------------\n");
             printf("Your board:\n");
             printBoard(board2);
-            hits2 = isHitShip(sea2, board1, s.p, hits2, &i);
-            isShipDestroyed(board1, s.p);
+            enterCoordinates(&p);
+            int newHits2 = isShipHit(sea2, board1, p, hits2, &i);
+            if(hits2 < newHits2)
+            {
+                printf("You hit a ship!\n");
+            }
+            else
+            {
+                printf("You missed it!\n");
+            }
+            hits2 = newHits2;
         }
         if (hits1 == countShipSigns())
         {
-            printf("\n---------PLAYER 1 WINS---------\n");
+            printf("\n---------PLAYER 1 WINS----------\n");
             return;
         }
         if (hits2 == countShipSigns())
@@ -627,288 +655,291 @@ void gamePvsP(char **board1, char **board2)
             return;
         }
         i++;
+        // SLEEP
+        sleep(1);
+        // Sleep(1000);
     }
 }
 
-bool setCompShip(char **board, int shipLength, int startX, int startY, int direction)
-{
-    if (direction == 1 || direction == 3)
-    {
-        if (!isValidPlacement(board, startX, startY, 2, false))
-        {
-            return false;
-        }
-        else if (direction == 1)
-        {
-            for (int i = 0; i < shipLength; i++)
-            {
-                board[startX - i][startY] = SHIP_SIGN;
-            }
-            return true;
-        }
-        else
-        {
-            for (int i = 0; i < shipLength; i++)
-            {
-                board[startX + i][startY] = SHIP_SIGN;
-            }
-            return true;
-        }
-    }
-    else
-    {
-        if (!isValidPlacement(board, startX, startY, 2, true))
-        {
-            return false;
-        }
-        else if (direction == 2)
-        {
-            for (int i = 0; i < shipLength; i++)
-            {
-                board[startX][startY - i] = SHIP_SIGN;
-            }
-            return true;
-        }
-        else
-        {
-            for (int i = 0; i < shipLength; i++)
-            {
-                board[startX][startY + i] = SHIP_SIGN;
-            }
-            return true;
-        }
-    }
-}
+// bool setCompShip(char **board, int shipLength, int startX, int startY, int direction)
+// {
+//     if (direction == 1 || direction == 3)
+//     {
+//         if (!isValidPlacement(board, startX, startY, 2, false))
+//         {
+//             return false;
+//         }
+//         else if (direction == 1)
+//         {
+//             for (int i = 0; i < shipLength; i++)
+//             {
+//                 board[startX - i][startY] = SHIP_SIGN;
+//             }
+//             return true;
+//         }
+//         else
+//         {
+//             for (int i = 0; i < shipLength; i++)
+//             {
+//                 board[startX + i][startY] = SHIP_SIGN;
+//             }
+//             return true;
+//         }
+//     }
+//     else
+//     {
+//         if (!isValidPlacement(board, startX, startY, 2, true))
+//         {
+//             return false;
+//         }
+//         else if (direction == 2)
+//         {
+//             for (int i = 0; i < shipLength; i++)
+//             {
+//                 board[startX][startY - i] = SHIP_SIGN;
+//             }
+//             return true;
+//         }
+//         else
+//         {
+//             for (int i = 0; i < shipLength; i++)
+//             {
+//                 board[startX][startY + i] = SHIP_SIGN;
+//             }
+//             return true;
+//         }
+//     }
+// }
 
-void setCompBoard(char **compBoard)
-{
-    int direction, x, y, i;
-    for (i = 0; i < 4; i++)
-    {
-        x = rand() % 10;
-        y = rand() % 10;
-        direction = rand() % 4 + 1;
-        if (!setCompShip(compBoard, 2, x, y, direction))
-        {
-            i--;
-            continue;
-        }
-    }
-    for (i = 0; i < 3; i++)
-    {
-        x = rand() % 10;
-        y = rand() % 10;
-        direction = rand() % 4 + 1;
-        if (!setCompShip(compBoard, 3, x, y, direction))
-        {
-            i--;
-            continue;
-        }
-    }
-    for (i = 0; i < 2; i++)
-    {
-        x = rand() % 10;
-        y = rand() % 10;
-        direction = rand() % 4 + 1;
-        if (!setCompShip(compBoard, 4, x, y, direction))
-        {
-            i--;
-            continue;
-        }
-    }
-    i = 0;
-    while (i < 1)
-    {
-        x = rand() % 10;
-        y = rand() % 10;
-        direction = rand() % 4 + 1;
-        if (!setCompShip(compBoard, 6, x, y, direction))
-        {
-            continue;
-        }
-        i++;
-    }
-}
+// void setCompBoard(char **compBoard)
+// {
+//     int direction, x, y, i;
+//     for (i = 0; i < 4; i++)
+//     {
+//         x = rand() % 10;
+//         y = rand() % 10;
+//         direction = rand() % 4 + 1;
+//         if (!setCompShip(compBoard, 2, x, y, direction))
+//         {
+//             i--;
+//             continue;
+//         }
+//     }
+//     for (i = 0; i < 3; i++)
+//     {
+//         x = rand() % 10;
+//         y = rand() % 10;
+//         direction = rand() % 4 + 1;
+//         if (!setCompShip(compBoard, 3, x, y, direction))
+//         {
+//             i--;
+//             continue;
+//         }
+//     }
+//     for (i = 0; i < 2; i++)
+//     {
+//         x = rand() % 10;
+//         y = rand() % 10;
+//         direction = rand() % 4 + 1;
+//         if (!setCompShip(compBoard, 4, x, y, direction))
+//         {
+//             i--;
+//             continue;
+//         }
+//     }
+//     i = 0;
+//     while (i < 1)
+//     {
+//         x = rand() % 10;
+//         y = rand() % 10;
+//         direction = rand() % 4 + 1;
+//         if (!setCompShip(compBoard, 6, x, y, direction))
+//         {
+//             continue;
+//         }
+//         i++;
+//     }
+// }
 
-void dumbComp(int *x, int *y)
-{
-    x = rand() % 10;
-    y = rand() % 10;
-}
+// void dumbComp(int *x, int *y)
+// {
+//     x = rand() % 10;
+//     y = rand() % 10;
+// }
 
-void smartComp(int *x, int *y, int correctX, int correctY, int hitParts)
-{
-    int direction;
-    if (hitParts == 1)
-    {
-        while (1)
-        {
-            direction = rand() % 4 + 1;
-            if (direction == 1 && isWithinBoard(x - 1, y))
-            {
-                x--;
-                return;
-            }
-            else if (direction == 2 && isWithinBoard(x, y - 1))
-            {
-                y--;
-                return;
-            }
-            else if (direction == 3 && isWithinBoard(x + 1, y))
-            {
-                x++;
-                return;
-            }
-            else if (isWithinBoard(x, y + 1))
-            {
-                y++;
-                return;
-            }
-        }
-    }
-    else
-    {
-        if (x == correctX)
-        {
-            if (y < correctY)
-            {
-                if (isWithinBoard(x, y - 1))
-                {
-                    y--;
-                }
-                else
-                {
-                    y = correctY + 1;
-                }
-                return;
-            }
-            else
-            {
-                if (isWithinBoard(x, y + 1))
-                {
-                    y++;
-                }
-                else
-                {
-                    y = correctY - 1;
-                }
-                return;
-            }
-        }
-        else
-        {
-            if (x < correctX)
-            {
-                if (isWithinBoard(x - 1, y))
-                {
-                    x--;
-                }
-                else
-                {
-                    x = correctX + 1;
-                }
-                return;
-            }
-            else
-            {
-                if (isWithinBoard(x + 1, y))
-                {
-                    x++;
-                }
-                else
-                {
-                    x = correctX - 1;
-                }
-                return;
-            }
-        }
-    }
-}
+// void smartComp(int *x, int *y, int correctX, int correctY, int hitParts)
+// {
+//     int direction;
+//     if (hitParts == 1)
+//     {
+//         while (1)
+//         {
+//             direction = rand() % 4 + 1;
+//             if (direction == 1 && isWithinBoard(x - 1, y))
+//             {
+//                 x--;
+//                 return;
+//             }
+//             else if (direction == 2 && isWithinBoard(x, y - 1))
+//             {
+//                 y--;
+//                 return;
+//             }
+//             else if (direction == 3 && isWithinBoard(x + 1, y))
+//             {
+//                 x++;
+//                 return;
+//             }
+//             else if (isWithinBoard(x, y + 1))
+//             {
+//                 y++;
+//                 return;
+//             }
+//         }
+//     }
+//     else
+//     {
+//         if (x == correctX)
+//         {
+//             if (y < correctY)
+//             {
+//                 if (isWithinBoard(x, y - 1))
+//                 {
+//                     y--;
+//                 }
+//                 else
+//                 {
+//                     y = correctY + 1;
+//                 }
+//                 return;
+//             }
+//             else
+//             {
+//                 if (isWithinBoard(x, y + 1))
+//                 {
+//                     y++;
+//                 }
+//                 else
+//                 {
+//                     y = correctY - 1;
+//                 }
+//                 return;
+//             }
+//         }
+//         else
+//         {
+//             if (x < correctX)
+//             {
+//                 if (isWithinBoard(x - 1, y))
+//                 {
+//                     x--;
+//                 }
+//                 else
+//                 {
+//                     x = correctX + 1;
+//                 }
+//                 return;
+//             }
+//             else
+//             {
+//                 if (isWithinBoard(x + 1, y))
+//                 {
+//                     x++;
+//                 }
+//                 else
+//                 {
+//                     x = correctX - 1;
+//                 }
+//                 return;
+//             }
+//         }
+//     }
+// }
 
-// TO DO
-void gamePvsComp(char **playerBoard, char **compBoard)
-{
-    setCompBoard(compBoard);
-    setAllShips(playerBoard);
-    bool end = true;
-    int turn = 0;
-    Ship s;
-    int playerHits = 0;
-    int computerHits = 0;
-    bool compFound = false;
-    char **playerSea = setSea();
-    int hitX, hitY;
-    int alrHitX = -1;
-    int alrHitY = -1;
-    int numberOfHitParts = 0;
-    while (!end)
-    {
-        printf("Player's board:\n");
-        printBoard(playerBoard);
-        printf("Player's hits:\n");
-        printBoard(playerSea);
-        if (turn % 2 == 0)
-        {
-            printf("Player's turn:\n");
-            enterCoordinates(&s);
-            playerHits = hitShip(compBoard, s.x, s.y, playerHits, &turn);
-        }
-        else
-        {
-            printf("Computer's turn:\n");
-            if (!compFound)
-            {
-                dumbComp(&hitX, &hitY);
-            }
-            else
-            {
-                smartComp(&hitX, &hitY, alrHitX, alrHitY, numberOfHitParts);
-            }
-            computerHits = hitShip(playerBoard, hitX, hitY, computerHits, &turn);
-            if (playerBoard[hitX][hitY] == HIT_SHIP_SIGN)
-            {
-                compFound = true;
-                numberOfHitParts++;
-                if (alrHitX == -1 && alrHitY == -1)
-                {
-                    alrHitX = hitX;
-                    alrHitY = hitY;
-                }
-            }
-            if (playerBoard[hitX][hitY] == MISSED_SHIP_SIGN && compFound)
-            {
-                if (hitX < alrHitX)
-                {
-                    hitX = alrHitX + 1;
-                }
-                else
-                {
-                    hitX = alrHitX - 1;
-                }
-                if (hitY < alrHitY)
-                {
-                    hitY = alrHitY + 1;
-                }
-                else
-                {
-                    hitY = alrHitY - 1;
-                }
-            }
-        }
-        if (playerHits == countShipSigns())
-        {
-            printf("\n---------PLAYER WINS---------");
-            return;
-        }
-        if (computerHits == countShipSigns())
-        {
-            printf("\n---------COMPUTER WINS---------");
-            return;
-        }
-        turn++;
-        system("cls");
-    }
-}
+// // TO DO
+// void gamePvsComp(char **playerBoard, char **compBoard)
+// {
+//     setCompBoard(compBoard);
+//     setAllShips(playerBoard);
+//     bool end = true;
+//     int turn = 0;
+//     Ship s;
+//     int playerHits = 0;
+//     int computerHits = 0;
+//     bool compFound = false;
+//     char **playerSea = setSea();
+//     int hitX, hitY;
+//     int alrHitX = -1;
+//     int alrHitY = -1;
+//     int numberOfHitParts = 0;
+//     while (!end)
+//     {
+//         printf("Player's board:\n");
+//         printBoard(playerBoard);
+//         printf("Player's hits:\n");
+//         printBoard(playerSea);
+//         if (turn % 2 == 0)
+//         {
+//             printf("Player's turn:\n");
+//             enterCoordinates(&s);
+//             playerHits = hitShip(compBoard, s.x, s.y, playerHits, &turn);
+//         }
+//         else
+//         {
+//             printf("Computer's turn:\n");
+//             if (!compFound)
+//             {
+//                 dumbComp(&hitX, &hitY);
+//             }
+//             else
+//             {
+//                 smartComp(&hitX, &hitY, alrHitX, alrHitY, numberOfHitParts);
+//             }
+//             computerHits = hitShip(playerBoard, hitX, hitY, computerHits, &turn);
+//             if (playerBoard[hitX][hitY] == HIT_SHIP_SIGN)
+//             {
+//                 compFound = true;
+//                 numberOfHitParts++;
+//                 if (alrHitX == -1 && alrHitY == -1)
+//                 {
+//                     alrHitX = hitX;
+//                     alrHitY = hitY;
+//                 }
+//             }
+//             if (playerBoard[hitX][hitY] == MISSED_SHIP_SIGN && compFound)
+//             {
+//                 if (hitX < alrHitX)
+//                 {
+//                     hitX = alrHitX + 1;
+//                 }
+//                 else
+//                 {
+//                     hitX = alrHitX - 1;
+//                 }
+//                 if (hitY < alrHitY)
+//                 {
+//                     hitY = alrHitY + 1;
+//                 }
+//                 else
+//                 {
+//                     hitY = alrHitY - 1;
+//                 }
+//             }
+//         }
+//         if (playerHits == countShipSigns())
+//         {
+//             printf("\n---------PLAYER WINS---------");
+//             return;
+//         }
+//         if (computerHits == countShipSigns())
+//         {
+//             printf("\n---------COMPUTER WINS---------");
+//             return;
+//         }
+//         turn++;
+//         system("cls");
+//     }
+// }
 
 int main()
 {
@@ -943,6 +974,7 @@ int main()
             printf("Player 2 set ships:\n");
             setAllShips(board2);
             gamePvsP(board1, board2);
+            printf("hi\n");
             break;
 
         case 3:
