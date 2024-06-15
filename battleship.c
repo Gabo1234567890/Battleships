@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <windows.h>
+#include <string.h>
 
 #define BOARD_SIDE_SIZE 10
 
@@ -35,6 +36,90 @@ typedef struct Ship
     Point p;
     char direction;
 } Ship;
+
+struct ReplayNode {
+  int player;
+  int x;
+  int y;
+  char aftermath[10];
+  struct ReplayNode * next;
+};
+
+typedef struct {
+  struct ReplayNode * head;
+  int size;
+} ReplayList;
+
+//WORKS
+static struct ReplayNode * createnode(int player, int x, int y, char *aftermath) {
+  struct ReplayNode * newnode = (struct ReplayNode *) malloc(sizeof(struct ReplayNode));
+  if (newnode == NULL) {
+    printf("Error allocating memory \n");
+    exit(1);
+  }
+  newnode->player = player;
+  newnode->x = x;
+  newnode->y = y;
+  strcpy(newnode->aftermath, aftermath);
+  
+  return newnode;
+}
+
+//WORKS
+ReplayList init() {
+  ReplayList list = {size: 0, head:NULL};
+  return list;
+}
+
+struct ReplayNode * get(ReplayList * list, int index) {
+  if (index < 0 || index >= list->size) {
+    return NULL;
+  }
+
+  struct ReplayNode * currentnode = list->head;
+  for (int i = 0; i < index; i++) {
+    currentnode = currentnode->next;
+  }
+
+  return currentnode;
+}
+
+//WORKS
+void pushfront(ReplayList * list, int player, int x, int y, char *aftermath) {
+  struct ReplayNode * newnode = createnode(player, x, y, aftermath);
+  newnode->next = list->head;
+  list->head = newnode;
+  list->size++;
+}
+
+//WORKS
+void push(ReplayList * list, int index, int player, int x, int y, char *aftermath) {
+  if (index == 0) {
+    pushfront(list, player, x, y, aftermath);
+    return;
+  }
+
+  struct ReplayNode * prev = get(list, index-1);
+  struct ReplayNode * newnode = createnode(player, x, y, aftermath);
+  newnode->next = prev->next;
+  prev->next = newnode;
+  list->size++;
+}
+
+//WORKS
+void pushback(ReplayList * list, int player, int x, int y, char *aftermath) {
+  push(list, list->size, player, x, y, aftermath);
+}
+
+//WORKS
+void printReplayList(ReplayList * list) {
+  struct ReplayNode * currentnode = list->head;
+  while (currentnode != NULL) {
+    printf("Player %d shoots at X:%d and Y:%d and %s \n", currentnode->player, currentnode->x, currentnode->y, currentnode->aftermath);
+    currentnode = currentnode->next;
+  }
+  printf("\n");
+}
 
 // WORKS
 char **setSea()
@@ -978,6 +1063,17 @@ void gamePvsComp(char **playerBoard, char **compBoard)
     }
 }
 
+//IN PROCCESS
+void replay(){
+    ReplayList rlist = init();
+    pushback(&rlist, 1, 6, 3, "Misses");
+    pushback(&rlist, 2, 5, 7, "Hits");
+    pushback(&rlist, 2, 5, 8, "Misses");
+    pushback(&rlist, 1, 3, 0, "Hits");
+    pushback(&rlist, 1, 3, 1, "Misses");
+    printReplayList(&rlist);
+}
+
 int main()
 {
     char **board1 = setSea();
@@ -1015,6 +1111,10 @@ int main()
 
         case 3:
             printf("");
+            break;
+        
+        case 4:
+            replay();
             break;
 
         default:
