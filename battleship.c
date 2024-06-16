@@ -496,21 +496,24 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
 // WORKS
 bool checkBoardFromFile(char **board)
 {
-    int shipHorizontalLength = 0;
-    int shipVerticalLength = 0;
     int currentNumberOfSmallShips = 0;
     int currentNumberOfMidShips = 0;
     int currentNumberOfBigShips = 0;
     int currentNumberOfGigaShips = 0;
-    Ship *wholeShipCoordinates = (Ship *)malloc(sizeof(Ship));
-    int size = 1;
+    bool ships[BOARD_SIDE_SIZE][BOARD_SIDE_SIZE] = {false};
     Ship s;
     Ship newS;
     for (int i = 0; i < BOARD_SIDE_SIZE; i++)
     {
+        Ship *wholeShipCoordinates = (Ship *)malloc(sizeof(Ship));
+        int size = 1;
         for (int j = 0; j < BOARD_SIDE_SIZE; j++)
         {
-            if (board[i][j] != SEA_SIGN && board[i][j] != SHIP_SIGN)
+            if (board[i][j] == SEA_SIGN || ships[i][j] == true)
+            {
+                continue;
+            }
+            else if (board[i][j] != SEA_SIGN && board[i][j] != SHIP_SIGN)
             {
                 printf("There are invalid symbols!\n");
                 return false;
@@ -522,13 +525,10 @@ bool checkBoardFromFile(char **board)
 
                 newS.p.x = s.p.x;
                 newS.p.y = s.p.y;
-                if (isWithinBoard(newS.p) && board[newS.p.x][newS.p.y] == SHIP_SIGN)
-                {
-                    wholeShipCoordinates[0].p.x = newS.p.x;
-                    wholeShipCoordinates[0].p.y = newS.p.y;
-                    shipHorizontalLength++;
-                    shipVerticalLength++;
-                }
+                wholeShipCoordinates[0].p.x = newS.p.x;
+                wholeShipCoordinates[0].p.y = newS.p.y;
+                int shipHorizontalLength = 1;
+                int shipVerticalLength = 1;
 
                 newS.p.x = s.p.x - 1;
                 while (isWithinBoard(newS.p))
@@ -590,7 +590,7 @@ bool checkBoardFromFile(char **board)
                 newS.p.y = s.p.y - 1;
                 while (isWithinBoard(newS.p))
                 {
-                    if (board[newS.p.x][newS.p.y] == HIT_SHIP_SIGN)
+                    if (board[newS.p.x][newS.p.y] == SHIP_SIGN)
                     {
                         size++;
                         wholeShipCoordinates = (Ship *)realloc(wholeShipCoordinates, size * sizeof(Ship));
@@ -604,16 +604,21 @@ bool checkBoardFromFile(char **board)
                     }
                     newS.p.y--;
                 }
-
                 int shipLength = 0;
-                if ((shipHorizontalLength > 1 && shipVerticalLength > 1) || shipHorizontalLength > GIGA_SHIP_LENGTH || shipVerticalLength > GIGA_SHIP_LENGTH)
+                if ((shipHorizontalLength > 1 && shipVerticalLength > 1))
                 {
                     printf("Invalid board! Your ships are too close to one another!\n");
+                    return false;
+                }
+                else if (shipHorizontalLength > GIGA_SHIP_LENGTH || shipVerticalLength > GIGA_SHIP_LENGTH)
+                {
+                    printf("Your ships are too long!\n");
                     return false;
                 }
                 else if (shipHorizontalLength == 1 && shipVerticalLength == 1)
                 {
                     printf("You can't have one cell ship!\n");
+                    exit(1);
                     return false;
                 }
                 else if (shipHorizontalLength == SMALL_SHIP_LENGTH || shipVerticalLength == SMALL_SHIP_LENGTH)
@@ -662,25 +667,50 @@ bool checkBoardFromFile(char **board)
                     shipLength = shipVerticalLength;
                 }
 
-                for (int i = 0; i < size; i++)
+                for (int k = 0; k < size; k++)
                 {
-                    isShipValid(board, wholeShipCoordinates[i], shipLength);
+                    isShipValid(board, wholeShipCoordinates[k], shipLength);
+                    ships[wholeShipCoordinates[k].p.x][wholeShipCoordinates[k].p.y] = true;
                 }
             }
         }
     }
+
+    if (currentNumberOfSmallShips < NUMBER_OF_SMALL_SHIPS)
+    {
+        printf("You don't have enough small ships!\n");
+        return false;
+    }
+    if (currentNumberOfMidShips < NUMBER_OF_MID_SHIPS)
+    {
+        printf("You don't have enough mid ships!\n");
+        return false;
+    }
+    if (currentNumberOfBigShips < NUMBER_OF_BIG_SHIPS)
+    {
+        printf("You don't have enough big ships!\n");
+        return false;
+    }
+    if (currentNumberOfGigaShips < NUMBER_OF_GIGA_SHIPS)
+    {
+        printf("You don't have enough giga ships!\n");
+        return false;
+    }
+
+    return true;
 }
 
 // WORKS
-char **readBoardFromFile(char *filename)
+void readBoardFromFile(char **board, const char *filename)
 {
-    char **board = setSea();
+    clearBoard(board);
     FILE *f;
     f = fopen(filename, "r");
     if (f == NULL)
     {
         printf("Can't open file!\n");
-        return NULL;
+        board = NULL;
+        return;
     }
     char line[BOARD_SIDE_SIZE + 2];
     int i = 0;
@@ -689,13 +719,12 @@ char **readBoardFromFile(char *filename)
         if (strlen(line) > BOARD_SIDE_SIZE + 1 || i >= BOARD_SIDE_SIZE)
         {
             printf("Ivalid file!\n");
-            return NULL;
+            board = NULL;
+            return;
         }
         strcpy(board[i], line);
         i++;
     }
-
-    return board;
 }
 
 // WORKS
@@ -718,16 +747,21 @@ void setAllShips(char **board)
             char filename[20];
             printf("Enter filename: ");
             scanf("%19[^\n]", filename);
-            board = readBoardFromFile(filename);
-            if (board != NULL)
+            readBoardFromFile(board, filename);
+            if (board == NULL)
             {
-                break;
+                clearBoard(board);
+                setAllShips(board);
             }
             bool valid = checkBoardFromFile(board);
             if (valid == false)
             {
                 clearBoard(board);
                 setAllShips(board);
+                break;
+            }
+            else
+            {
                 break;
             }
         }

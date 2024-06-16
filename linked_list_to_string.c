@@ -247,6 +247,11 @@ void free_replay_list(ReplayList *list)
     list->size = 0;
 }
 
+char *encrypt_linked_list(ReplayList *list)
+{
+    char *string_to_be_encrypted = list_to_string(list->head);
+}
+
 int main()
 {
     ReplayList list = init();
