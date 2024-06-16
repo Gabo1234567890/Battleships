@@ -813,7 +813,7 @@ void setAllShips(char **board)
             bool valid = checkBoardFromFile(board);
             if(board == false)
             {
-                board = clearBoard();
+                clearBoard(board);
                 setAllShips(board);
                 break;
             }
