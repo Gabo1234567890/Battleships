@@ -8,13 +8,13 @@
 
 #define BOARD_SIDE_SIZE 10
 
-#define NUMBER_OF_SMALL_SHIPS 4
+#define NUMBER_OF_SMALL_SHIPS 0
 #define SMALL_SHIP_LENGTH 2
 
-#define NUMBER_OF_MID_SHIPS 3
+#define NUMBER_OF_MID_SHIPS 0
 #define MID_SHIP_LENGTH 3
 
-#define NUMBER_OF_BIG_SHIPS 2
+#define NUMBER_OF_BIG_SHIPS 0
 #define BIG_SHIP_LENGTH 4
 
 #define NUMBER_OF_GIGA_SHIPS 1
@@ -40,8 +40,7 @@ typedef struct Ship
 
 struct ReplayNode {
   int player;
-  int i;
-  int hits;
+  bool isHit;
   struct Point point;
   struct ReplayNode * next;
 };
@@ -53,15 +52,14 @@ typedef struct
 } ReplayList;
 
 //WORKS
-static struct ReplayNode * createnode(int player, int i, int hits, Point point) {
+static struct ReplayNode * createnode(int player, bool isHit, Point point) {
   struct ReplayNode * newnode = (struct ReplayNode *) malloc(sizeof(struct ReplayNode));
   if (newnode == NULL) {
     printf("Error allocating memory \n");
     exit(1);
   }
   newnode->player = player;
-  newnode->i = i;
-  newnode->hits = hits;
+  newnode->isHit = isHit;
   newnode->point = point;
 
   return newnode;
@@ -91,30 +89,30 @@ struct ReplayNode *get(ReplayList *list, int index)
 }
 
 //WORKS
-void pushfront(ReplayList * list, int player, int i, int hits, Point point) {
-  struct ReplayNode * newnode = createnode(player, i, hits, point);
+void pushfront(ReplayList * list, int player, bool isHit, Point point) {
+  struct ReplayNode * newnode = createnode(player, isHit, point);
   newnode->next = list->head;
   list->head = newnode;
   list->size++;
 }
 
 //WORKS
-void push(ReplayList * list, int index, int player, int i, int hits, Point point) {
+void push(ReplayList * list, int index, int player, bool isHit, Point point) {
   if (index == 0) {
-    pushfront(list, player, i, hits, point);
+    pushfront(list, player, isHit, point);
     return;
   }
 
   struct ReplayNode * prev = get(list, index-1);
-  struct ReplayNode * newnode = createnode(player, i, hits, point);
+  struct ReplayNode * newnode = createnode(player, isHit, point);
   newnode->next = prev->next;
   prev->next = newnode;
   list->size++;
 }
 
 //WORKS
-void pushback(ReplayList * list, int player, int i, int hits, Point point) {
-  push(list, list->size, player, i, hits, point);
+void pushback(ReplayList * list, int player, int isHit, Point point) {
+  push(list, list->size, player, isHit, point);
 }
 
 //WORKS
@@ -131,7 +129,7 @@ void printReplayList(ReplayList * list) {
 void copyReplayList(ReplayList *dest, ReplayList *src) {
   struct ReplayNode *currentnode = src->head;
   while (currentnode != NULL) {
-    pushback(dest, currentnode->player, currentnode->i, currentnode->hits, currentnode->point);
+    pushback(dest, currentnode->player, currentnode->isHit, currentnode->point);
     currentnode = currentnode->next;
   }
 }
@@ -768,9 +766,6 @@ int isShipHit(char **sea, char **board, Point p, int hits, int *i)
     return hits;
 }
 
-int ReplayShipHit(char **board, Point p){
-
-}
 
 // WORKS
 int countShipSigns()
@@ -870,14 +865,14 @@ ReplayList gamePvsP(char **board1, char **board2)
             }
             else if (hits1 < newHits1)
             {
-                pushback(&rlist, 1, i, hits1, p);
+                pushback(&rlist, 1, true, p);
                 printf("You hit a ship!\n");
                 hits1 = newHits1;
                 hit = true;
             }
             else
             {
-                pushback(&rlist, 1, i, hits1, p);
+                pushback(&rlist, 1, false, p);
                 printf("You missed it!\n");
                 hit = false;
             }
@@ -927,25 +922,27 @@ ReplayList gamePvsP(char **board1, char **board2)
             }
             else if (hits2 < newHits2)
             {
-                pushback(&rlist, 2, i, hits2, p);
+                pushback(&rlist, 2, true, p);
                 printf("You hit a ship!\n");
                 hits2 = newHits2;
                 hit = true;
             }
             else
             {
-                pushback(&rlist, 2, i, hits2, p);
+                pushback(&rlist, 2, false, p);
                 printf("You missed it!\n");
                 hit = false;
             }
         }
         if (hits1 == /*countShipSigns()*/ 6)
         {
+            pushback(&rlist, true, hits2, p);
             printf("\n---------PLAYER 1 WINS----------\n");
             return rlist;
         }
         if (hits2 == /*countShipSigns()*/ 6)
         {
+            pushback(&rlist, 2, true, p);
             printf("\n---------PLAYER 2 WINS---------\n");
             return rlist;
         }
@@ -1319,23 +1316,39 @@ void readBoardFromFile(char **board, char *filename)
 }
 
 //IN PROCCESS
-void replay(char **board1, char **board2){
+void replay(ReplayList rlist, char **board1, char **board2){
     char **sea1 = setSea();
     char **sea2 = setSea();
-    ReplayList rlist = init();
     struct ReplayNode * currentnode = rlist.head;
     while(currentnode->next != NULL){
-        printBoard(sea2);
-        printBoard(sea1);
         if(currentnode->player == 1){
-            isShipHit(sea1, board2, currentnode->point, currentnode->hits, &currentnode->i);
+            if(currentnode->isHit == true){
+                sea1[currentnode->point.x][currentnode->point.y] = HIT_SHIP_SIGN;
+                board2[currentnode->point.x][currentnode->point.y] = HIT_SHIP_SIGN;
+            }
+            else{
+                sea1[currentnode->point.x][currentnode->point.y] = MISSED_SHIP_SIGN;
+                board2[currentnode->point.x][currentnode->point.y] = MISSED_SHIP_SIGN;
+            }
         }
         else if(currentnode->player == 2){
-            isShipHit(sea2, board1, currentnode->point, currentnode->hits, &currentnode->i);
+            if(currentnode->isHit == true){
+                sea2[currentnode->point.x][currentnode->point.y] = HIT_SHIP_SIGN;
+                board1[currentnode->point.x][currentnode->point.y] = HIT_SHIP_SIGN;
+            }
+            else{
+                sea2[currentnode->point.x][currentnode->point.y] = MISSED_SHIP_SIGN;
+                board1[currentnode->point.x][currentnode->point.y] = MISSED_SHIP_SIGN;                
+            }
         }
+        printf("PLAYER 1: \n");
+        printBoard(sea2);
+        printf("PLAYER 2 \n");
+        printBoard(sea1);
+        printf("\n");
         currentnode = currentnode->next;
+        sleep(1);
     }
-    sleep(1);
 }
 
 int main()
@@ -1383,7 +1396,7 @@ int main()
             break;
 
         case 4:
-            replay(board1, board2);
+            replay(rlist, board1, board2);
             break;
 
         default:
