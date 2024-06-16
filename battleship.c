@@ -473,7 +473,7 @@ bool moveShip(char **board, Ship s1, Ship s2)
 }
 
 // WORKS
-char **setOneKindShips(char **board, int numberOfShips, int shipLength)
+void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool first)
 {
     Ship s;
     for (int i = 0; i < numberOfShips; i++)
@@ -482,111 +482,119 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
         s.p.x = -1;
         s.p.y = -1;
         s.direction = '-';
+        int choice = 0;
         printBoard(board);
-        enterCoordinates(&s.p);
-
-        while (s.direction != 'u' && s.direction != 'd' && s.direction != 'l' && s.direction != 'r')
+        while (choice != 1 && choice != 2)
         {
-            printf("The direction must be up - u, down - d, left - l, right - r!\n");
-            printf("Enter direction: ");
-            scanf("%c", &s.direction);
-            getchar();
-        }
-
-        int validShip = isShipValid(board, s, shipLength);
-
-        if (validShip == -1)
-        {
-            printf("Can't put ship there! You are out of the board!\n");
-            i--;
-            // SLEEP
-            // sleep(2);
-            Sleep(2000);
-        }
-        else if (validShip == -2)
-        {
-            printf("\nThere is another ship next to this one! You can't put it here!\n");
-            i--;
-            // SLEEP
-            // sleep(2);
-            Sleep(2000);
-        }
-        else
-        {
-            setShip(board, s, shipLength);
-        }
-
-        char choice = '-';
-
-        while (validShip != -1 && validShip != -2)
-        {
-            // SYSTEM
-            // system("clear");
-            system("cls");
-            printBoard(board);
-            while (choice != 'y' && choice != 'n')
+            if (first == true)
             {
-                printf("Do you want to move a ship? (yes - y, no - n)\n");
-                scanf("%c", &choice);
+                choice = 1;
+                first = false;
+            }
+            else
+            {
+                printf("1. Put ship\n");
+                printf("2. Move ship\n");
+                printf("Choice: ");
+                scanf("%d", &choice);
                 getchar();
             }
-            if (choice == 'n')
+
+            switch (choice)
             {
-                break;
-            }
-            choice = '-';
-            Ship s1;
-            while (1)
-            {
-                printf("The ship you want to move:\n");
-                enterCoordinates(&s1.p);
-                if (board[s1.p.x][s1.p.y] != SHIP_SIGN)
+            case 1:
+                enterCoordinates(&s.p);
+                while (s.direction != 'u' && s.direction != 'd' && s.direction != 'l' && s.direction != 'r')
                 {
-                    printf("\nThere is no ship!\n\n");
+                    printf("The direction must be up - u, down - d, left - l, right - r!\n");
+                    printf("Enter direction: ");
+                    scanf("%c", &s.direction);
+                    getchar();
+                }
+
+                int validShip = isShipValid(board, s, shipLength);
+
+                if (validShip == -1)
+                {
+                    printf("Can't put ship there! You are out of the board!\n");
+                    i--;
+                    // SLEEP
+                    sleep(2);
+                    // Sleep(2000);
+                }
+                else if (validShip == -2)
+                {
+                    printf("\nThere is another ship next to this one! You can't put it here!\n");
+                    i--;
+                    // SLEEP
+                    sleep(2);
+                    // Sleep(2000);
                 }
                 else
                 {
-                    break;
+                    setShip(board, s, shipLength);
                 }
-            }
-            bool place = false;
-            while (place == false)
-            {
-                printf("New place of this ship:\n");
-                Ship s2;
-                enterCoordinates(&s2.p);
-                printf("The direction must be up - u, down - d, left - l, right - r!\n");
-                printf("Enter direction: ");
-                scanf("%c", &s2.direction);
-                getchar();
-                if (moveShip(board, s1, s2) == true)
+                break;
+
+            case 2:
+                // SYSTEM
+                system("clear");
+                // system("cls");
+                printBoard(board);
+                Ship s1;
+                while (1)
                 {
-                    place = true;
+                    printf("The ship you want to move:\n");
+                    enterCoordinates(&s1.p);
+                    if (board[s1.p.x][s1.p.y] != SHIP_SIGN)
+                    {
+                        printf("\nThere is no ship!\n\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+                while (1)
+                {
+                    printf("New place of this ship:\n");
+                    Ship s2;
+                    enterCoordinates(&s2.p);
+                    printf("The direction must be up - u, down - d, left - l, right - r!\n");
+                    printf("Enter direction: ");
+                    scanf("%c", &s2.direction);
+                    getchar();
+                    if (moveShip(board, s1, s2) == true)
+                    {
+                        break;
+                    }
+                }
+                // SYSTEM
+                system("clear");
+                // system("cls");
+                break;
+
+            default:
+                break;
             }
         }
-        // SYSTEM
-        // system("clear");
-        system("cls");
     }
-
-    return board;
 }
 
 // WORKS
 void setAllShips(char **board)
 {
+    printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
+    setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH, true);
+
+    printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+    setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH, false);
+
+    printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+    setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH, false);
+
     printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-    setOneKindShips(board, 2, SMALL_SHIP_LENGTH);
-
-    // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
-
-    // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
-
-    // printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
+    setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH, false);
 }
 
 // WORKS
@@ -735,13 +743,12 @@ ReplayList gamePvsP(char **board1, char **board2)
     char **sea1 = setSea();
     char **sea2 = setSea();
     ReplayList rlist = init();
-    bool end = false;
     Point p;
     int i = 1;
     int hits1 = 0;
     int hits2 = 0;
     printf("Let the game begin!\n");
-    while (!end)
+    while (1)
     {
         if (i % 2 == 1)
         {
