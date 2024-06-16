@@ -1123,20 +1123,32 @@ ReplayList gamePvsP(char **board1, char **board2)
         }
         if (hits1 == countShipSigns())
         {
+            // SLEEP
+            // sleep(2);
+            Sleep(2000);
+            // SYSTEM
+            // system(clear);
+            system("cls");
             pushback(&rlist, true, hits2, p);
             printf("\n---------PLAYER 1 WINS----------\n");
             return rlist;
         }
         if (hits2 == countShipSigns())
         {
+            // SLEEP
+            // sleep(2);
+            Sleep(2000);
+            // SYSTEM
+            // system(clear);
+            system("cls");
             pushback(&rlist, 2, true, p);
             printf("\n---------PLAYER 2 WINS---------\n");
             return rlist;
         }
         i++;
         // SLEEP
-        // sleep(1);
-        Sleep(1000);
+        // sleep(2);
+        Sleep(2000);
     }
 }
 
@@ -1362,8 +1374,6 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
     int numberOfHitParts = 0;
     while (1)
     {
-        printf("Computer board:\n");
-        printBoard(compBoard);
         printf("Player's hits:\n");
         printBoard(playerSea);
         printf("Player's board:\n");
@@ -1483,8 +1493,6 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             // system(clear);
             system("cls");
             pushback(&rlist, 1, true, playerHit);
-            printf("Computer board:\n");
-            printBoard(compBoard);
             printf("Player's hits:\n");
             printBoard(playerSea);
             printf("Player's board:\n");
@@ -1500,8 +1508,6 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             // system(clear);
             system("cls");
             pushback(&rlist, 2, true, computerHit);
-            printf("Computer board:\n");
-            printBoard(compBoard);
             printf("Player's hits:\n");
             printBoard(playerSea);
             printf("Player's board:\n");
@@ -1511,7 +1517,7 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
         turn++;
         // SLEEP
         // sleep(2);
-        Sleep(1000);
+        Sleep(2000);
         //   SYSTEM
         // system("clear");
         system("cls");
