@@ -3,9 +3,9 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
-//#include <windows.h>
-//  SYSTEM
-//  SLEEP
+// #include <windows.h>
+//   SYSTEM
+//   SLEEP
 
 #define BOARD_SIDE_SIZE 10
 
@@ -959,7 +959,7 @@ ReplayList gamePvsP(char **board1, char **board2)
         i++;
         // SLEEP
         sleep(1);
-        //Sleep(1000);
+        // Sleep(1000);
     }
 }
 
@@ -1173,7 +1173,12 @@ void gamePvsComp(char **playerBoard, char **compBoard)
             {
                 smartComp(&hit, alrHit, numberOfHitParts);
             }
-            computerHits = isShipHit(compSea, playerBoard, hit, computerHits, &turn);
+            int newComputerHits = isShipHit(compSea, playerBoard, hit, computerHits, &turn);
+            if (newComputerHits == -1)
+            {
+                continue;
+            }
+            computerHits = newComputerHits;
             if (isShipDestroyed(compSea, playerBoard, hit))
             {
                 compFound = false;
@@ -1282,7 +1287,12 @@ void gamePvsComp(char **playerBoard, char **compBoard)
                         }
                     }
                 }
-                computerHits = isShipHit(compSea, playerBoard, hit, computerHits, &turn);
+                newComputerHits = isShipHit(compSea, playerBoard, hit, computerHits, &turn);
+                if (newComputerHits == -1)
+                {
+                    continue;
+                }
+                computerHits = newComputerHits;
                 if (playerBoard[hit.x][hit.y] == HIT_SHIP_SIGN)
                 {
                     numberOfHitParts++;
@@ -1303,10 +1313,10 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         turn++;
         // SLEEP
         sleep(2);
-        //Sleep(2000);
-        // SYSTEM
+        // Sleep(2000);
+        //  SYSTEM
         system("clear");
-        //system("cls");
+        // system("cls");
     }
 }
 
@@ -1323,15 +1333,15 @@ void replay(ReplayList *rlist)
 
 int main()
 {
-    char **board1 = setSea();
-    char **board2 = setSea();
+
     ReplayList rlist = init();
     ReplayList templist = init();
-
     int choice = 0;
-    printf("------------BATTLESHIP------------\n");
+    printf("------------BATTLESHIPS------------\n");
     while (1)
     {
+        char **board1 = setSea();
+        char **board2 = setSea();
         printf("1. Rules\n");
         printf("2. Start game person VS person\n");
         printf("3. Start game person VS computer\n");
