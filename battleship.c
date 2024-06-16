@@ -739,6 +739,10 @@ int isShipHit(char **sea, char **board, Point p, int hits, int *i)
             printf("DESTROYED SHIP\n");
         }
     }
+    else if(board[p.x][p.y] == HIT_SHIP_SIGN || board[p.x][p.y] == MISSED_SHIP_SIGN || board[p.x][p.y] == DESTROYED_SHIP_SIGN)
+    {
+        return -1;
+    }
     else
     {
         sea[p.x][p.y] = MISSED_SHIP_SIGN;
@@ -777,17 +781,21 @@ ReplayList gamePvsP(char **board1, char **board2)
             printBoard(board1);
             enterCoordinates(&p);
             int newHits1 = isShipHit(sea1, board2, p, hits1, &i);
-            if (hits1 < newHits1)
+            if(newHits1 == -1)
+            {
+                printf("You already hit there!\n");
+            }
+            else if (hits1 < newHits1)
             {
                 pushback(&rlist, 1, p.x, p.y, "Hits");
                 printf("You hit a ship!\n");
+                hits1 = newHits1;
             }
             else
             {
                 pushback(&rlist, 1, p.x, p.y, "Misses");
                 printf("You missed it!\n");
             }
-            hits1 = newHits1;
         }
         else
         {
@@ -799,17 +807,21 @@ ReplayList gamePvsP(char **board1, char **board2)
             printBoard(board2);
             enterCoordinates(&p);
             int newHits2 = isShipHit(sea2, board1, p, hits2, &i);
-            if (hits2 < newHits2)
+            if(newHits2 == -1)
+            {
+                printf("You already hit there!\n");
+            }
+            else if (hits2 < newHits2)
             {
                 pushback(&rlist, 2, p.x, p.y, "Hits");
                 printf("You hit a ship!\n");
+                hits2 = newHits2;
             }
             else
             {
                 pushback(&rlist, 2, p.x, p.y, "Misses");
                 printf("You missed it!\n");
             }
-            hits2 = newHits2;
         }
         if (hits1 == countShipSigns())
         {
