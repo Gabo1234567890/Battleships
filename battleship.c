@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>
 #include <time.h>
 //   SYSTEM
 //   SLEEP
@@ -543,16 +543,16 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
                     first = true;
                     i--;
                     // SLEEP
-                    // sleep(2);
-                    Sleep(2000);
+                    sleep(2);
+                    //Sleep(2000);
                 }
                 else if (validShip == -2)
                 {
                     printf("\nThere is another ship next to this one! You can't put it here!\n");
                     i--;
                     // SLEEP
-                    // sleep(2);
-                    Sleep(2000);
+                    sleep(2);
+                    //Sleep(2000);
                 }
                 else
                 {
@@ -580,8 +580,8 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
 
             case 2:
                 // SYSTEM
-                // system("clear");
-                system("cls");
+                system("clear");
+                //system("cls");
                 printBoard(board);
                 Ship s1;
                 while (1)
@@ -616,8 +616,8 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
                     }
                 }
                 // SYSTEM
-                // system("clear");
-                system("cls");
+                system("clear");
+                //system("cls");
                 break;
 
             default:
@@ -638,153 +638,170 @@ bool checkBoardFromFile(char **board)
     int currentNumberOfGigaShips = 0;
     Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
     int size = 1;
+    Point p;
     Point newP;
-    newP.x = p.x;
-    newP.y = p.y;
-    bool destroyed = false;
-    if (isWithinBoard(newP) && board[newP.x][newP.y] == SHIP_SIGN)
+    for(int i = 0; i < BOARD_SIDE_SIZE; i++)
     {
-        wholeShipCoordinates[0].x = newP.x;
-        wholeShipCoordinates[0].y = newP.y;
-        shipHorizontalLength++;
-        shipVerticalLength++;
-    }
+        for(int j = 0; j < BOARD_SIDE_SIZE; j++)
+        {
+            if(board[i][j] != SEA_SIGN && board[i][j] != SHIP_SIGN)
+            {
+                printf("There are invalid symbols!\n");
+                return false;
+            }
+            else if(board[i][j] == SHIP_SIGN)
+            {
+                p.x = i;
+                p.y = j;
 
-    newP.x = p.x - 1;
-    while (isWithinBoard(newP))
-    {
-        if (board[newP.x][newP.y] == SHIP_SIGN)
-        {
-            size++;
-            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
-            shipVerticalLength++;
-        }
-        else
-        {
-            break;
-        }
-        newP.x--;
-    }
+            newP.x = p.x;
+            newP.y = p.y;
+            if (isWithinBoard(newP) && board[newP.x][newP.y] == SHIP_SIGN)
+            {
+                wholeShipCoordinates[0].x = newP.x;
+                wholeShipCoordinates[0].y = newP.y;
+                shipHorizontalLength++;
+                shipVerticalLength++;
+            }
 
-    newP.x = p.x + 1;
-    newP.y = p.y;
-    while (isWithinBoard(newP))
-    {
-        if (board[newP.x][newP.y] == SHIP_SIGN)
-        {
-            size++;
-            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
-            shipVerticalLength++;
-        }
-        else
-        {
-            break;
-        }
-        newP.x++;
-    }
+            newP.x = p.x - 1;
+            while (isWithinBoard(newP))
+            {
+                if (board[newP.x][newP.y] == SHIP_SIGN)
+                {
+                    size++;
+                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+                    wholeShipCoordinates[size - 1].x = newP.x;
+                    wholeShipCoordinates[size - 1].y = newP.y;
+                    shipVerticalLength++;
+                }
+                else
+                {
+                    break;
+                }
+                newP.x--;
+            }
 
-    newP.x = p.x;
-    newP.y = p.y + 1;
-    while (isWithinBoard(newP))
-    {
-        if (board[newP.x][newP.y] == SHIP_SIGN)
-        {
-            size++;
-            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
-            shipHorizontalLength++;
-        }
-        else
-        {
-            break;
-        }
-        newP.y++;
-    }
+            newP.x = p.x + 1;
+            newP.y = p.y;
+            while (isWithinBoard(newP))
+            {
+                if (board[newP.x][newP.y] == SHIP_SIGN)
+                {
+                    size++;
+                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+                    wholeShipCoordinates[size - 1].x = newP.x;
+                    wholeShipCoordinates[size - 1].y = newP.y;
+                    shipVerticalLength++;
+                }
+                else
+                {
+                    break;
+                }
+                newP.x++;
+            }
 
-    newP.x = p.x;
-    newP.y = p.y - 1;
-    while (isWithinBoard(newP))
-    {
-        if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
-        {
-            size++;
-            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            wholeShipCoordinates[size - 1].x = newP.x;
-            wholeShipCoordinates[size - 1].y = newP.y;
-            shipHorizontalLength++;
-        }
-        else
-        {
-            break;
-        }
-        newP.y--;
-    }
+            newP.x = p.x;
+            newP.y = p.y + 1;
+            while (isWithinBoard(newP))
+            {
+                if (board[newP.x][newP.y] == SHIP_SIGN)
+                {
+                    size++;
+                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+                    wholeShipCoordinates[size - 1].x = newP.x;
+                    wholeShipCoordinates[size - 1].y = newP.y;
+                    shipHorizontalLength++;
+                }
+                else
+                {
+                    break;
+                }
+                newP.y++;
+            }
 
-    int shipLength = 0;
-    if ((shipHorizontalLength > 1 && shipVerticalLength > 1) || shipHorizontalLength > GIGA_SHIP_LENGTH || shipVerticalLength > GIGA_SHIP_LENGTH)
-    {
-        printf("Invalid board! Your ships are too close to one another!\n");
-        return false;
-    }
-    else if (shipHorizontalLength == 1 && shipVerticalLength == 1)
-    {
-        printf("You can't have one cell ship!\n");
-        return false;
-    }
-    else if (shipHorizontalLength == SMALL_SHIP_LENGTH || shipVerticalLength == SMALL_SHIP_LENGTH)
-    {
-        currentNumberOfSmallShips++;
-        if (currentNumberOfSmallShips > NUMBER_OF_SMALL_SHIPS)
-        {
-            printf("You put too much small ships!\n");
-            return false;
-        }
-    }
-    else if (shipHorizontalLength == MID_SHIP_LENGTH || shipVerticalLength == MID_SHIP_LENGTH)
-    {
-        currentNumberOfMidShips++;
-        if (currentNumberOfMidShips > NUMBER_OF_MID_SHIPS)
-        {
-            printf("You put too much mid ships!\n");
-            return false;
-        }
-    }
-    else if (shipHorizontalLength == BIG_SHIP_LENGTH || shipVerticalLength == BIG_SHIP_LENGTH)
-    {
-        currentNumberOfBigShips++;
-        if (currentNumberOfBigShips > NUMBER_OF_BIG_SHIPS)
-        {
-            printf("You put too much big ships!\n");
-            return false;
-        }
-    }
-    else if (shipHorizontalLength == GIGA_SHIP_LENGTH || shipVerticalLength == GIGA_SHIP_LENGTH)
-    {
-        currentNumberOfGigaShips++;
-        if (currentNumberOfGigaShips > NUMBER_OF_GIGA_SHIPS)
-        {
-            printf("You put too much giga ships!\n");
-            return false;
-        }
-    }
+            newP.x = p.x;
+            newP.y = p.y - 1;
+            while (isWithinBoard(newP))
+            {
+                if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+                {
+                    size++;
+                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+                    wholeShipCoordinates[size - 1].x = newP.x;
+                    wholeShipCoordinates[size - 1].y = newP.y;
+                    shipHorizontalLength++;
+                }
+                else
+                {
+                    break;
+                }
+                newP.y--;
+            }
 
-    if (shipHorizontalLength > 1)
-    {
-        shipLength = shipHorizontalLength;
-    }
-    else
-    {
-        shipLength = shipVerticalLength;
-    }
+            int shipLength = 0;
+            if ((shipHorizontalLength > 1 && shipVerticalLength > 1) || shipHorizontalLength > GIGA_SHIP_LENGTH || shipVerticalLength > GIGA_SHIP_LENGTH)
+            {
+                printf("Invalid board! Your ships are too close to one another!\n");
+                return false;
+            }
+            else if (shipHorizontalLength == 1 && shipVerticalLength == 1)
+            {
+                printf("You can't have one cell ship!\n");
+                return false;
+            }
+            else if (shipHorizontalLength == SMALL_SHIP_LENGTH || shipVerticalLength == SMALL_SHIP_LENGTH)
+            {
+                currentNumberOfSmallShips++;
+                if (currentNumberOfSmallShips > NUMBER_OF_SMALL_SHIPS)
+                {
+                    printf("You put too much small ships!\n");
+                    return false;
+                }
+            }
+            else if (shipHorizontalLength == MID_SHIP_LENGTH || shipVerticalLength == MID_SHIP_LENGTH)
+            {
+                currentNumberOfMidShips++;
+                if (currentNumberOfMidShips > NUMBER_OF_MID_SHIPS)
+                {
+                    printf("You put too much mid ships!\n");
+                    return false;
+                }
+            }
+            else if (shipHorizontalLength == BIG_SHIP_LENGTH || shipVerticalLength == BIG_SHIP_LENGTH)
+            {
+                currentNumberOfBigShips++;
+                if (currentNumberOfBigShips > NUMBER_OF_BIG_SHIPS)
+                {
+                    printf("You put too much big ships!\n");
+                    return false;
+                }
+            }
+            else if (shipHorizontalLength == GIGA_SHIP_LENGTH || shipVerticalLength == GIGA_SHIP_LENGTH)
+            {
+                currentNumberOfGigaShips++;
+                if (currentNumberOfGigaShips > NUMBER_OF_GIGA_SHIPS)
+                {
+                    printf("You put too much giga ships!\n");
+                    return false;
+                }
+            }
 
-    for (int i = 0; i < size; i++)
-    {
-        isShipValid(board, wholeShipCoordinates[i], shipLength);
+            if (shipHorizontalLength > 1)
+            {
+                shipLength = shipHorizontalLength;
+            }
+            else
+            {
+                shipLength = shipVerticalLength;
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+                isShipValid(board, wholeShipCoordinates[i], shipLength);
+            }
+            }
+        }
     }
 }
 
@@ -1203,8 +1220,8 @@ ReplayList gamePvsP(char **board1, char **board2)
         }
         i++;
         // SLEEP
-        // sleep(1);
-        Sleep(1000);
+        sleep(1);
+        //Sleep(1000);
     }
 }
 
@@ -1459,8 +1476,8 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             {
                 turn++;
                 // SYSTEM
-                // system("clear");
-                system("cls");
+                system("clear");
+                //system("cls");
                 continue;
             }
             computerHits = newComputerHits;
@@ -1504,11 +1521,11 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
         }
         turn++;
         // SLEEP
-        // sleep(2);
-        Sleep(3000);
+        sleep(2);
+        //Sleep(3000);
         //  SYSTEM
-        // system("clear");
-        system("cls");
+        system("clear");
+        //system("cls");
     }
 }
 
