@@ -171,6 +171,10 @@ char *rsa_decrypt_string(long numbers[], KeysPair keys_pair) {
     return decrypted_message;
 }
 
+
+
+
+
 int main() {
     char word[100] = "kolko";
     
@@ -205,3 +209,5 @@ int main() {
 
     return 0;
 }
+
+
