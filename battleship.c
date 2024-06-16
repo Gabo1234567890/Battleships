@@ -176,11 +176,11 @@ bool isWithinBoard(Point p)
     return (p.x >= 0 && p.x < BOARD_SIDE_SIZE && p.y >= 0 && p.y < BOARD_SIDE_SIZE);
 }
 
+// WORKS
 bool isWithinBoardCoordinate(int coord)
 {
     return (coord >= 0 && coord < BOARD_SIDE_SIZE);
 }
-
 
 // WORKS
 bool isShipAdjacent(char **board, Point p, int shipLength, bool horizontal)
@@ -256,7 +256,6 @@ int isShipValid(char **board, Ship s, int shipLength)
 
     return -1;
 }
-
 
 // WORKS
 int setShip(char **board, Ship s, int shipLength)
@@ -453,9 +452,9 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
             getchar();
         }
 
-        int direction = isShipValid(board, s, shipLength);
+        int validShip = isShipValid(board, s, shipLength);
 
-        if (direction == -1)
+        if (validShip == -1)
         {
             printf("Can't put ship there! You are out of the board!\n");
             i--;
@@ -463,7 +462,7 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
             sleep(2);
             // Sleep(2000);
         }
-        else if (direction == -2)
+        else if (validShip == -2)
         {
             printf("\nThere is another ship next to this one! You can't put it here!\n");
             i--;
@@ -478,7 +477,7 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
 
         char choice = '-';
 
-        while (direction != -1 && direction != -2)
+        while (validShip != -1 && validShip != -2)
         {
             // SYSTEM
             system("clear");
@@ -537,16 +536,16 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
 void setAllShips(char **board)
 {
     printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-    setOneKindShips(board, 1, SMALL_SHIP_LENGTH);
+    setOneKindShips(board, 2, SMALL_SHIP_LENGTH);
 
-    printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-    setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
+    // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
 
-    printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-    setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
+    // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
 
-    printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
-    setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
+    // printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
 }
 
 // WORKS
@@ -660,7 +659,7 @@ bool isShipDestroyed(char** sea, char **board, Point p)
     return destroyed;
 }
 
-// WORK
+// WORKS
 int isShipHit(char **sea, char **board, Point p, int hits, int *i)
 {
     if (board[p.x][p.y] == SHIP_SIGN)
@@ -683,6 +682,7 @@ int isShipHit(char **sea, char **board, Point p, int hits, int *i)
     return hits;
 }
 
+// WORKS
 int countShipSigns()
 {
     return NUMBER_OF_SMALL_SHIPS * SMALL_SHIP_LENGTH + NUMBER_OF_MID_SHIPS * MID_SHIP_LENGTH + NUMBER_OF_BIG_SHIPS * BIG_SHIP_LENGTH + NUMBER_OF_GIGA_SHIPS * GIGA_SHIP_LENGTH;
@@ -924,7 +924,7 @@ void smartComp(Point *hit, Point alrHit, int hitParts)
     }
 }
 
-// TO DO
+// IN PROCESS
 void gamePvsComp(char **playerBoard, char **compBoard)
 {
     setCompBoard(compBoard);
@@ -1095,6 +1095,12 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         }
         system("cls");
     }
+}
+
+// TO DO
+void readBoardFromFile(char **board, char* filename)
+{
+    
 }
 
 //IN PROCCESS
