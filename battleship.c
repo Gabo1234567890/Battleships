@@ -11,6 +11,22 @@
 // SYSTEM
 // SLEEP
 
+void freeReplayList(ReplayList *list)
+{
+    struct ReplayNode *currentnode = list->head;
+    struct ReplayNode *nextnode;
+
+    while (currentnode != NULL)
+    {
+        nextnode = currentnode->next;
+        free(currentnode);
+        currentnode = nextnode;
+    }
+
+    list->head = NULL;
+    list->size = 0;
+}
+
 // WORKS
 char **setSea()
 {
@@ -1544,4 +1560,5 @@ void replay(ReplayList rlist, char **board1, char **board2)
         currentnode = currentnode->next;
         sleep(1);
     }
+    freeReplayList(rlist);
 }
