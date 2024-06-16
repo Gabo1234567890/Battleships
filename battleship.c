@@ -1189,13 +1189,13 @@ ReplayList gamePvsP(char **board1, char **board2)
                 hit = false;
             }
         }
-        if (hits1 == /*countShipSigns()*/ 6)
+        if (hits1 == countShipSigns())
         {
             pushback(&rlist, true, hits2, p);
             printf("\n---------PLAYER 1 WINS----------\n");
             return rlist;
         }
-        if (hits2 == /*countShipSigns()*/ 6)
+        if (hits2 == countShipSigns())
         {
             pushback(&rlist, 2, true, p);
             printf("\n---------PLAYER 2 WINS---------\n");
@@ -1235,7 +1235,8 @@ void setCompBoard(char **compBoard)
         if (time(0) - t >= 5)
         {
             srand(time(0));
-            compBoard = setCompBoard(setSea());
+            clearBoard(compBoard);
+            setCompBoard(compBoard);
             return;
         }
         s.p.x = rand() % BOARD_SIDE_SIZE;
@@ -1252,8 +1253,10 @@ void setCompBoard(char **compBoard)
     {
         if (time(0) - t >= 5)
         {
-            printf("Computer could not generate board!\n");
-            exit(1);
+            srand(time(0));
+            clearBoard(compBoard);
+            setCompBoard(compBoard);
+            return;
         }
         s.p.x = rand() % BOARD_SIDE_SIZE;
         s.p.y = rand() % BOARD_SIDE_SIZE;
@@ -1269,8 +1272,10 @@ void setCompBoard(char **compBoard)
     {
         if (time(0) - t >= 5)
         {
-            printf("Computer could not generate board!\n");
-            exit(1);
+            srand(time(0));
+            clearBoard(compBoard);
+            setCompBoard(compBoard);
+            return;
         }
         s.p.x = rand() % BOARD_SIDE_SIZE;
         s.p.y = rand() % BOARD_SIDE_SIZE;
@@ -1286,8 +1291,10 @@ void setCompBoard(char **compBoard)
     {
         if (time(0) - t >= 5)
         {
-            printf("Computer could not generate board!\n");
-            exit(1);
+            srand(time(0));
+            clearBoard(compBoard);
+            setCompBoard(compBoard);
+            return;
         }
         s.p.x = rand() % BOARD_SIDE_SIZE;
         s.p.y = rand() % BOARD_SIDE_SIZE;
@@ -1437,10 +1444,12 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             {
                 printf("You hit a ship!\n");
                 playerHits = newPlayerHits;
+                pushback(rlist, 1, true, playerHit);
             }
             else
             {
                 printf("You missed it!\n");
+                pushback(rlist, 1, false, playerHit);
             }
         }
         else
@@ -1463,7 +1472,15 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
                 system("cls");
                 continue;
             }
-            computerHits = newComputerHits;
+            if (computerHits == newComputerHits)
+            {
+                pushback(rlist, 2, false, computerHit);
+            }
+            else
+            {
+                computerHits = newComputerHits;
+                pushback(rlist, 2, true, computerHit);
+            }
             if (isShipDestroyed(compSea, playerBoard, computerHit))
             {
                 compFound = false;
@@ -1492,13 +1509,13 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
         }
         if (playerHits == countShipSigns())
         {
-            pushback(rlist, 1, true, hit);
+            // pushback(rlist, 1, true, playerHit);
             printf("\n---------PLAYER WINS---------");
             return rlist;
         }
         if (computerHits == countShipSigns())
         {
-            pushback(rlist, 2, true, hit);
+            // pushback(rlist, 2, true, computerHit);
             printf("\n---------COMPUTER WINS---------");
             return rlist;
         }
@@ -1510,11 +1527,6 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
         // system("clear");
         system("cls");
     }
-}
-
-// TO DO
-void readBoardFromFile(char **board, char *filename)
-{
 }
 
 // IN PROCCESS
