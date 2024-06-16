@@ -709,8 +709,6 @@ bool checkBoardFromFile(char **board)
     for (int i = 0; i < size; i++)
     {
         isShipValid(board, wholeShipCoordinates[i], shipLength);
-        sea[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
-        board[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
     }
 }
 
