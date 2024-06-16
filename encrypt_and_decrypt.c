@@ -23,32 +23,28 @@ bool is_prime(unsigned long num) {
 
 // Function to find the next prime number greater than or equal to num
 unsigned long next_prime(unsigned long num) {
+    if (num <= 1) return 2;
     while (!is_prime(num)) {
         num++;
     }
     return num;
 }
 
-
-
-
-
 // Function to generate public and private keys from a word
 KeysPair generate_public_and_private_keys(const char *word) {
-     long hash1 = 0;
-     long hash2 = 0;
+    long hash1 = 0;
+    long hash2 = 0;
     int word_length = strlen(word);
     int half_length = word_length / 2;
     
     // Calculate hash1 from the first half of the word
     for (int i = 0; i < half_length; i++) {
-        hash1 = hash1  + word[i];
+        hash1 += word[i];
     }
 
     // Calculate hash2 from the second half of the word
-    printf("%d",half_length);
-    for (int i = half_length - 1; i < word_length; i++) {
-        hash2 = hash2  + word[i];
+    for (int i = half_length; i < word_length; i++) {
+        hash2 += word[i];
     }
 
     KeysPair result;
@@ -61,9 +57,9 @@ KeysPair generate_public_and_private_keys(const char *word) {
 // Function to compute the greatest common divisor
 long gcd(long a, long b) {
     while (b != 0) {
-        long t = b;
+        long temp = b;
         b = a % b;
-        a = t;
+        a = temp;
     }
     return a;
 }
@@ -113,32 +109,99 @@ long mod_inverse(long e, long phi) {
     return x1;
 }
 
-int main() {
-    char word[100];
-    printf("Enter a word to generate keys: ");
-    scanf("%99s", word);
-
-    KeysPair keys_pair = generate_public_and_private_keys(word);
-
+// Function to encrypt a string using RSA
+long *rsa_encrypt_string(const char *word, KeysPair keys_pair) {
+    int word_length = strlen(word);
     unsigned long p = keys_pair.pub_key;
     unsigned long q = keys_pair.priv_key;
-
+    
     unsigned long n = p * q;
     unsigned long phi = (p - 1) * (q - 1);
 
     unsigned long e = generate_e(phi);
     unsigned long d = mod_inverse(e, phi);
 
-    printf("Public Key: (%lu, %lu)\n", e, n);
-    printf("Private Key: (%lu, %lu)\n", d, n);
+    long *encrypted_numbers = malloc(sizeof(long) * word_length);
+    if (encrypted_numbers == NULL) {
+        perror("Memory allocation failed");
+        return NULL;
+    }
 
-    unsigned long message = 65; // Example message
-    unsigned long encrypted = mod_exp(message, e, n);
-    unsigned long decrypted = mod_exp(encrypted, d, n);
+    for (int i = 0; i < word_length; i++) {
+        long number_representation = (long)word[i]; // Convert character to its ASCII value
+        printf("%d/n",number_representation);
+        encrypted_numbers[i] = mod_exp(number_representation, e, n);
+    }
+    return encrypted_numbers;
+}
 
-    printf("Original Message: %lu\n", message);
-    printf("Encrypted Message: %lu\n", encrypted);
-    printf("Decrypted Message: %lu\n", decrypted);
+int find_array_length(long numbers[]) {
+    int length = 0;
+    while (numbers[length] != '\0') {
+        length++;
+    }
+    return length;
+}
+
+// Function to decrypt an array of RSA encrypted numbers
+char *rsa_decrypt_string(long numbers[], KeysPair keys_pair) {
+    unsigned long p = keys_pair.pub_key;
+    unsigned long q = keys_pair.priv_key;
+
+    unsigned long n = p * q;
+    unsigned long phi = (p - 1) * (q - 1);
+    unsigned long e = generate_e(phi);
+    unsigned long d = mod_inverse(e, phi);
+
+    int num_length = find_array_length(numbers); // Find the length of the numbers array
+
+    char *decrypted_message = malloc(num_length + 1); // +1 for null terminator
+    if (decrypted_message == NULL) {
+        perror("Memory allocation failed");
+        return NULL;
+    }
+
+    for (int i = 0; i < num_length; i++) {
+        long decrypted_number = mod_exp(numbers[i], d, n);
+        printf("%d",decrypted_message);
+        decrypted_message[i] = (char)decrypted_number;
+    }
+    decrypted_message[num_length] = '\0'; // Null terminate the string
+
+    return decrypted_message;
+}
+
+int main() {
+    char word[100] = "kolko";
+    
+
+    KeysPair keys_pair = generate_public_and_private_keys(word);
+    printf("%d %d lll         ",keys_pair.priv_key,keys_pair.pub_key);
+    char word2[] = "1,1,0,0;2,0,1,3;1,1,2,5";
+    long *encrypted_numbers = rsa_encrypt_string(word2, keys_pair);
+
+    if (encrypted_numbers == NULL) {
+        fprintf(stderr, "Encryption failed.\n");
+        return 1;
+    }
+
+    // Print encrypted numbers
+    printf("Encrypted numbers:\n");
+    for (int i = 0; i < strlen(word2); i++) {
+        printf("%ld  ", encrypted_numbers[i]);
+    }
+    printf("\n");
+
+    char *decrypted_message = rsa_decrypt_string(encrypted_numbers, keys_pair);
+    if (decrypted_message == NULL) {
+        fprintf(stderr, "Decryption failed.\n");
+        return 1;
+    }
+
+    printf("Decrypted Message: %s\n", decrypted_message);
+
+    free(encrypted_numbers); // Free memory allocated in rsa_encrypt_string
+    free(decrypted_message); // Free memory allocated in rsa_decrypt_string
 
     return 0;
 }
