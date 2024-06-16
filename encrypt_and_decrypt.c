@@ -177,7 +177,7 @@ int main() {
 
     KeysPair keys_pair = generate_public_and_private_keys(word);
     printf("%d %d lll         ",keys_pair.priv_key,keys_pair.pub_key);
-    char word2[] = "jijibiji";
+    char word2[] = "1,1,0,0;2,0,1,3;1,1,2,5";
     long *encrypted_numbers = rsa_encrypt_string(word2, keys_pair);
 
     if (encrypted_numbers == NULL) {
