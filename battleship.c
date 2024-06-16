@@ -3,9 +3,9 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
-//#include <windows.h>
-// SYSTEM
-// SLEEP
+#include <windows.h>
+//  SYSTEM
+//  SLEEP
 
 #define BOARD_SIDE_SIZE 10
 
@@ -39,88 +39,102 @@ typedef struct Ship
     char direction;
 } Ship;
 
-struct ReplayNode {
-  int player;
-  int x;
-  int y;
-  char aftermath[10];
-  struct ReplayNode * next;
+struct ReplayNode
+{
+    int player;
+    int x;
+    int y;
+    char aftermath[10];
+    struct ReplayNode *next;
 };
 
-typedef struct {
-  struct ReplayNode * head;
-  int size;
+typedef struct
+{
+    struct ReplayNode *head;
+    int size;
 } ReplayList;
 
-//WORKS
-static struct ReplayNode * createnode(int player, int x, int y, char *aftermath) {
-  struct ReplayNode * newnode = (struct ReplayNode *) malloc(sizeof(struct ReplayNode));
-  if (newnode == NULL) {
-    printf("Error allocating memory \n");
-    exit(1);
-  }
-  newnode->player = player;
-  newnode->x = x;
-  newnode->y = y;
-  strcpy(newnode->aftermath, aftermath);
-  
-  return newnode;
+// WORKS
+static struct ReplayNode *createnode(int player, int x, int y, char *aftermath)
+{
+    struct ReplayNode *newnode = (struct ReplayNode *)malloc(sizeof(struct ReplayNode));
+    if (newnode == NULL)
+    {
+        printf("Error allocating memory \n");
+        exit(1);
+    }
+    newnode->player = player;
+    newnode->x = x;
+    newnode->y = y;
+    strcpy(newnode->aftermath, aftermath);
+
+    return newnode;
 }
 
-//WORKS
-ReplayList init() {
-  ReplayList list = {size: 0, head:NULL};
-  return list;
+// WORKS
+ReplayList init()
+{
+    ReplayList list = {size : 0, head : NULL};
+    return list;
 }
 
-struct ReplayNode * get(ReplayList * list, int index) {
-  if (index < 0 || index >= list->size) {
-    return NULL;
-  }
+struct ReplayNode *get(ReplayList *list, int index)
+{
+    if (index < 0 || index >= list->size)
+    {
+        return NULL;
+    }
 
-  struct ReplayNode * currentnode = list->head;
-  for (int i = 0; i < index; i++) {
-    currentnode = currentnode->next;
-  }
+    struct ReplayNode *currentnode = list->head;
+    for (int i = 0; i < index; i++)
+    {
+        currentnode = currentnode->next;
+    }
 
-  return currentnode;
+    return currentnode;
 }
 
-//WORKS
-void pushfront(ReplayList * list, int player, int x, int y, char *aftermath) {
-  struct ReplayNode * newnode = createnode(player, x, y, aftermath);
-  newnode->next = list->head;
-  list->head = newnode;
-  list->size++;
+// WORKS
+void pushfront(ReplayList *list, int player, int x, int y, char *aftermath)
+{
+    struct ReplayNode *newnode = createnode(player, x, y, aftermath);
+    newnode->next = list->head;
+    list->head = newnode;
+    list->size++;
 }
 
-//WORKS
-void push(ReplayList * list, int index, int player, int x, int y, char *aftermath) {
-  if (index == 0) {
-    pushfront(list, player, x, y, aftermath);
-    return;
-  }
+// WORKS
+void push(ReplayList *list, int index, int player, int x, int y, char *aftermath)
+{
+    if (index == 0)
+    {
+        pushfront(list, player, x, y, aftermath);
+        return;
+    }
 
-  struct ReplayNode * prev = get(list, index-1);
-  struct ReplayNode * newnode = createnode(player, x, y, aftermath);
-  newnode->next = prev->next;
-  prev->next = newnode;
-  list->size++;
+    struct ReplayNode *prev = get(list, index - 1);
+    struct ReplayNode *newnode = createnode(player, x, y, aftermath);
+    newnode->next = prev->next;
+    prev->next = newnode;
+    list->size++;
 }
 
-//WORKS
-void pushback(ReplayList * list, int player, int x, int y, char *aftermath) {
-  push(list, list->size, player, x, y, aftermath);
+// WORKS
+void pushback(ReplayList *list, int player, int x, int y, char *aftermath)
+{
+    push(list, list->size, player, x, y, aftermath);
 }
 
-//WORKS
-void printReplayList(ReplayList * list) {
-  struct ReplayNode * currentnode = list->head;
-  while (currentnode != NULL) {
-    printf("Player %d shoots at X:%d and Y:%d and %s \n", currentnode->player, currentnode->x, currentnode->y, currentnode->aftermath);
-    currentnode = currentnode->next;
-  }
-  printf("\n");
+// WORKS
+void printReplayList(ReplayList *list)
+{
+    struct ReplayNode *currentnode = list->head;
+    while (currentnode != NULL)
+    {
+        printf("Player %d shoots at X:%d and Y:%d and %s \n", currentnode->player, currentnode->x, currentnode->y, currentnode->aftermath);
+        currentnode = currentnode->next;
+    }
+    printf("\n");
 }
 
 // WORKS
@@ -181,7 +195,6 @@ bool isWithinBoardCoordinate(int coord)
     return (coord >= 0 && coord < BOARD_SIDE_SIZE);
 }
 
-
 // WORKS
 bool isShipAdjacent(char **board, Point p, int shipLength, bool horizontal)
 {
@@ -219,7 +232,11 @@ int isShipValid(char **board, Ship s, int shipLength)
     bool res = true;
     if (s.direction == 'u' && isWithinBoardCoordinate(s.p.x - shipLength + 1))
     {
-        res = isShipAdjacent(board, s.p, shipLength, false);
+        while (s.p.x >= 0)
+        {
+            res = isShipAdjacent(board, s.p, shipLength, false) && res;
+            s.p.x--;
+        }
         if (res == false)
         {
             return -2;
@@ -228,7 +245,11 @@ int isShipValid(char **board, Ship s, int shipLength)
     }
     if (s.direction == 'd' && isWithinBoardCoordinate(s.p.x + shipLength - 1))
     {
-        res = isShipAdjacent(board, s.p, shipLength, false);
+        while (s.p.x < BOARD_SIDE_SIZE)
+        {
+            res = isShipAdjacent(board, s.p, shipLength, false) && res;
+            s.p.x++;
+        }
         if (res == false)
         {
             return -2;
@@ -237,7 +258,11 @@ int isShipValid(char **board, Ship s, int shipLength)
     }
     if (s.direction == 'l' && isWithinBoardCoordinate(s.p.y - shipLength + 1))
     {
-        res = isShipAdjacent(board, s.p, shipLength, true);
+        while (s.p.y >= 0)
+        {
+            res = isShipAdjacent(board, s.p, shipLength, true) && res;
+            s.p.y--;
+        }
         if (res == false)
         {
             return -2;
@@ -246,7 +271,11 @@ int isShipValid(char **board, Ship s, int shipLength)
     }
     if (s.direction == 'r' && isWithinBoardCoordinate(s.p.y + shipLength - 1))
     {
-        res = isShipAdjacent(board, s.p, shipLength, true);
+        while (s.p.y < BOARD_SIDE_SIZE)
+        {
+            res = isShipAdjacent(board, s.p, shipLength, true) && res;
+            s.p.y++;
+        }
         if (res == false)
         {
             return -2;
@@ -257,7 +286,6 @@ int isShipValid(char **board, Ship s, int shipLength)
     return -1;
 }
 
-
 // WORKS
 int setShip(char **board, Ship s, int shipLength)
 {
@@ -266,6 +294,7 @@ int setShip(char **board, Ship s, int shipLength)
     {
         return res;
     }
+    printf("Successfully put ship!\n");
     if (s.direction == 'u')
     {
         for (int i = 0; i < shipLength; i++)
@@ -460,16 +489,16 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
             printf("Can't put ship there! You are out of the board!\n");
             i--;
             // SLEEP
-            sleep(2);
-            // Sleep(2000);
+            // sleep(2);
+            Sleep(2000);
         }
         else if (direction == -2)
         {
             printf("\nThere is another ship next to this one! You can't put it here!\n");
             i--;
             // SLEEP
-            sleep(2);
-            // Sleep(2000);
+            // sleep(2);
+            Sleep(2000);
         }
         else
         {
@@ -481,8 +510,8 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
         while (direction != -1 && direction != -2)
         {
             // SYSTEM
-            system("clear");
-            // system("cls");
+            // system("clear");
+            system("cls");
             printBoard(board);
             while (choice != 'y' && choice != 'n')
             {
@@ -526,8 +555,8 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
             }
         }
         // SYSTEM
-        system("clear");
-        // system("cls");
+        // system("clear");
+        system("cls");
     }
 
     return board;
@@ -537,20 +566,20 @@ char **setOneKindShips(char **board, int numberOfShips, int shipLength)
 void setAllShips(char **board)
 {
     printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-    setOneKindShips(board, 1, SMALL_SHIP_LENGTH);
+    setOneKindShips(board, 2, SMALL_SHIP_LENGTH);
 
-    printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-    setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
+    // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH);
 
-    printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-    setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
+    // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH);
 
-    printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
-    setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
+    // printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
+    // setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH);
 }
 
 // WORKS
-bool isShipDestroyed(char** sea, char **board, Point p)
+bool isShipDestroyed(char **sea, char **board, Point p)
 {
     Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
     int size = 1;
@@ -577,7 +606,7 @@ bool isShipDestroyed(char** sea, char **board, Point p)
         {
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            
+
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
@@ -598,7 +627,7 @@ bool isShipDestroyed(char** sea, char **board, Point p)
         {
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            
+
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
@@ -619,7 +648,7 @@ bool isShipDestroyed(char** sea, char **board, Point p)
         {
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            
+
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
@@ -640,14 +669,14 @@ bool isShipDestroyed(char** sea, char **board, Point p)
         {
             size++;
             wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-            
+
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
             destroyed = true;
         }
         newP.y--;
     }
-    
+
     if (destroyed == true)
     {
         for (int i = 0; i < size; i++)
@@ -669,7 +698,7 @@ int isShipHit(char **sea, char **board, Point p, int hits, int *i)
         board[p.x][p.y] = HIT_SHIP_SIGN;
         (*i)--;
         hits++;
-        if(isShipDestroyed(sea, board, p))
+        if (isShipDestroyed(sea, board, p))
         {
             printf("DESTROYED SHIP\n");
         }
@@ -711,7 +740,7 @@ void gamePvsP(char **board1, char **board2)
             printBoard(board1);
             enterCoordinates(&p);
             int newHits1 = isShipHit(sea1, board2, p, hits1, &i);
-            if(hits1 < newHits1)
+            if (hits1 < newHits1)
             {
                 printf("You hit a ship!\n");
             }
@@ -731,7 +760,7 @@ void gamePvsP(char **board1, char **board2)
             printBoard(board2);
             enterCoordinates(&p);
             int newHits2 = isShipHit(sea2, board1, p, hits2, &i);
-            if(hits2 < newHits2)
+            if (hits2 < newHits2)
             {
                 printf("You hit a ship!\n");
             }
@@ -753,8 +782,8 @@ void gamePvsP(char **board1, char **board2)
         }
         i++;
         // SLEEP
-        sleep(1);
-        // Sleep(1000);
+        // sleep(1);
+        Sleep(1000);
     }
 }
 
@@ -779,34 +808,24 @@ void setCompBoard(char **compBoard)
 {
     Ship s;
     int direction;
-    for (int i = 0; i < NUMBER_OF_SMALL_SHIPS; i++)
+    printf("Starting giga ships!\n");
+    for (int i = 0; i < NUMBER_OF_GIGA_SHIPS; i++)
     {
-        s.p.x = rand() % 10;
-        s.p.y = rand() % 10;
+        s.p.x = rand() % BOARD_SIDE_SIZE;
+        s.p.y = rand() % BOARD_SIDE_SIZE;
         direction = rand() % 4 + 1;
         s.direction = intDirToCharDir(direction);
-        if (setShip(compBoard, s, SMALL_SHIP_LENGTH) < 0)
+        if (setShip(compBoard, s, GIGA_SHIP_LENGTH) < 0)
         {
             i--;
             continue;
         }
     }
-    for (int i = 0; i < NUMBER_OF_MID_SHIPS; i++)
-    {
-        s.p.x = rand() % 10;
-        s.p.y = rand() % 10;
-        direction = rand() % 4 + 1;
-        s.direction = intDirToCharDir(direction);
-        if (setShip(compBoard, s, MID_SHIP_LENGTH) < 0)
-        {
-            i--;
-            continue;
-        }
-    }
+    printf("Starting big ships!\n");
     for (int i = 0; i < NUMBER_OF_BIG_SHIPS; i++)
     {
-        s.p.x = rand() % 10;
-        s.p.y = rand() % 10;
+        s.p.x = rand() % BOARD_SIDE_SIZE;
+        s.p.y = rand() % BOARD_SIDE_SIZE;
         direction = rand() % 4 + 1;
         s.direction = intDirToCharDir(direction);
         if (setShip(compBoard, s, BIG_SHIP_LENGTH) < 0)
@@ -815,13 +834,27 @@ void setCompBoard(char **compBoard)
             continue;
         }
     }
-    for (int i = 0; i < NUMBER_OF_GIGA_SHIPS; i++)
+    printf("Starting mid ships!\n");
+    for (int i = 0; i < NUMBER_OF_MID_SHIPS; i++)
     {
-        s.p.x = rand() % 10;
-        s.p.y = rand() % 10;
+        s.p.x = rand() % BOARD_SIDE_SIZE;
+        s.p.y = rand() % BOARD_SIDE_SIZE;
         direction = rand() % 4 + 1;
         s.direction = intDirToCharDir(direction);
-        if (setShip(compBoard, s, GIGA_SHIP_LENGTH) < 0)
+        if (setShip(compBoard, s, MID_SHIP_LENGTH) < 0)
+        {
+            i--;
+            continue;
+        }
+    }
+    printf("Starting small ships!\n");
+    for (int i = 0; i < NUMBER_OF_SMALL_SHIPS; i++)
+    {
+        s.p.x = rand() % BOARD_SIDE_SIZE;
+        s.p.y = rand() % BOARD_SIDE_SIZE;
+        direction = rand() % 4 + 1;
+        s.direction = intDirToCharDir(direction);
+        if (setShip(compBoard, s, SMALL_SHIP_LENGTH) < 0)
         {
             i--;
             continue;
@@ -831,8 +864,8 @@ void setCompBoard(char **compBoard)
 
 void dumbComp(Point *hit)
 {
-    hit->x = rand() % 10;
-    hit->y = rand() % 10;
+    hit->x = rand() % BOARD_SIDE_SIZE;
+    hit->y = rand() % BOARD_SIDE_SIZE;
 }
 
 void smartComp(Point *hit, Point alrHit, int hitParts)
@@ -927,13 +960,10 @@ void smartComp(Point *hit, Point alrHit, int hitParts)
 // TO DO
 void gamePvsComp(char **playerBoard, char **compBoard)
 {
-    setCompBoard(compBoard);
-    setAllShips(playerBoard);
     char **playerSea = setSea();
     char **compSea = setSea();
     bool end = false;
     int turn = 0;
-    Point p;
     int playerHits = 0;
     int computerHits = 0;
     bool compFound = false;
@@ -944,15 +974,17 @@ void gamePvsComp(char **playerBoard, char **compBoard)
     int numberOfHitParts = 0;
     while (!end)
     {
-        printf("Player's board:\n");
-        printBoard(playerBoard);
+        printf("Computer board:\n");
+        printBoard(compBoard);
         printf("Player's hits:\n");
         printBoard(playerSea);
+        printf("Player's board:\n");
+        printBoard(playerBoard);
         if (turn % 2 == 0)
         {
             printf("Player's turn:\n");
-            enterCoordinates(&p);
-            playerHits = isShipHit(playerSea, compBoard, p, playerHits, &turn);
+            enterCoordinates(&hit);
+            playerHits = isShipHit(playerSea, compBoard, hit, playerHits, &turn);
         }
         else
         {
@@ -966,7 +998,6 @@ void gamePvsComp(char **playerBoard, char **compBoard)
                 smartComp(&hit, alrHit, numberOfHitParts);
             }
             computerHits = isShipHit(compSea, playerBoard, hit, computerHits, &turn);
-            turn++;
             if (isShipDestroyed(compSea, playerBoard, hit))
             {
                 compFound = false;
@@ -1093,12 +1124,19 @@ void gamePvsComp(char **playerBoard, char **compBoard)
             printf("\n---------COMPUTER WINS---------");
             return;
         }
+        turn++;
+        // SLEEP
+        // sleep(2);
+        Sleep(2000);
+        // SYSTEM
+        // system("clear");
         system("cls");
     }
 }
 
-//IN PROCCESS
-void replay(){
+// IN PROCCESS
+void replay()
+{
     ReplayList rlist = init();
     pushback(&rlist, 1, 6, 3, "Misses");
     pushback(&rlist, 2, 5, 7, "Hits");
@@ -1141,13 +1179,15 @@ int main()
             printf("Player 2 set ships:\n");
             setAllShips(board2);
             gamePvsP(board1, board2);
-            printf("hi\n");
             break;
 
         case 3:
-            printf("");
+            printf("Set your ships:\n");
+            setAllShips(board1);
+            setCompBoard(board2);
+            gamePvsComp(board1, board2);
             break;
-        
+
         case 4:
             replay();
             break;
