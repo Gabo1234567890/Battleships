@@ -476,7 +476,7 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
         printBoard(board);
         while (choice != 1 && choice != 2)
         {
-            if (first)
+            if (first && i == 0)
             {
                 choice = 1;
                 first = false;
@@ -511,6 +511,7 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
                 if (validShip == -1)
                 {
                     printf("Can't put ship there! You are out of the board!\n");
+                    first = true;
                     i--;
                     // SLEEP
                     sleep(2);
@@ -602,6 +603,10 @@ bool checkBoardFromFile(char **board)
 {
     int shipHorizontalLength = 0;
     int shipVerticalLength = 0;
+    int currentNumberOfSmallShips = 0;
+    int currentNumberOfMidShips = 0;
+    int currentNumberOfBigShips = 0;
+    int currentNumberOfGigaShips = 0;
     Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
     int size = 1;
     Point newP;
@@ -697,7 +702,49 @@ bool checkBoardFromFile(char **board)
         printf("Invalid board! Your ships are too close to one another!\n");
         return false;
     }
-    else if(shipHorizontalLength > 1)
+    else if(shipHorizontalLength == 1 && shipVerticalLength == 1)
+    {
+        printf("You can't have one cell ship!\n");
+        return false;
+    }
+    else if(shipHorizontalLength == SMALL_SHIP_LENGTH || shipVerticalLength == SMALL_SHIP_LENGTH)
+    {
+        currentNumberOfSmallShips++;
+        if(currentNumberOfSmallShips > NUMBER_OF_SMALL_SHIPS)
+        {
+            printf("You put too much small ships!\n");
+            return false;
+        }
+    }
+    else if(shipHorizontalLength == MID_SHIP_LENGTH || shipVerticalLength == MID_SHIP_LENGTH)
+    {
+        currentNumberOfMidShips++;
+        if(currentNumberOfMidShips > NUMBER_OF_MID_SHIPS)
+        {
+            printf("You put too much mid ships!\n");
+            return false;
+        }
+    }
+    else if(shipHorizontalLength == BIG_SHIP_LENGTH || shipVerticalLength == BIG_SHIP_LENGTH)
+    {
+        currentNumberOfBigShips++;
+        if(currentNumberOfBigShips > NUMBER_OF_BIG_SHIPS)
+        {
+            printf("You put too much big ships!\n");
+            return false;
+        }
+    }
+    else if(shipHorizontalLength == GIGA_SHIP_LENGTH || shipVerticalLength == GIGA_SHIP_LENGTH)
+    {
+        currentNumberOfGigaShips++;
+        if(currentNumberOfGigaShips > NUMBER_OF_GIGA_SHIPS)
+        {
+            printf("You put too much giga ships!\n");
+            return false;
+        }
+    }
+
+    if(shipHorizontalLength > 1)
     {
         shipLength = shipHorizontalLength;
     }
@@ -761,9 +808,15 @@ void setAllShips(char **board)
             scanf("%19[^\n]", filename);
             printf("filename = %s\n", filename);
             board = readBoardFromFile(filename);
-            printBoard(board);
             if(board != NULL)
             {
+                break;
+            }
+            bool valid = checkBoardFromFile(board);
+            if(board == false)
+            {
+                board = clearBoard();
+                setAllShips(board);
                 break;
             }
         }
