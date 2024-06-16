@@ -906,14 +906,14 @@ void setAllShips(char **board)
         printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
         setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH, true, true);
 
-        // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-        // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH, false, false);
+        printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+        setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH, false, false);
 
-        // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-        // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH, false, false);
+        printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+        setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH, false, false);
 
-        // printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-        // setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH, false, true);
+        printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
+        setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH, false, true);
     }
 }
 
