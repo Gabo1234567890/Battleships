@@ -636,10 +636,10 @@ bool checkBoardFromFile(char **board)
     int currentNumberOfMidShips = 0;
     int currentNumberOfBigShips = 0;
     int currentNumberOfGigaShips = 0;
-    Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
+    Ship *wholeShipCoordinates = (Ship *)malloc(sizeof(Ship));
     int size = 1;
-    Point p;
-    Point newP;
+    Ship s;
+    Ship newS;
     for(int i = 0; i < BOARD_SIDE_SIZE; i++)
     {
         for(int j = 0; j < BOARD_SIDE_SIZE; j++)
@@ -651,92 +651,92 @@ bool checkBoardFromFile(char **board)
             }
             else if(board[i][j] == SHIP_SIGN)
             {
-                p.x = i;
-                p.y = j;
+                s.p.x = i;
+                s.p.y = j;
 
-            newP.x = p.x;
-            newP.y = p.y;
-            if (isWithinBoard(newP) && board[newP.x][newP.y] == SHIP_SIGN)
+            newS.p.x = s.p.x;
+            newS.p.y = s.p.y;
+            if (isWithinBoard(newS.p) && board[newS.p.x][newS.p.y] == SHIP_SIGN)
             {
-                wholeShipCoordinates[0].x = newP.x;
-                wholeShipCoordinates[0].y = newP.y;
+                wholeShipCoordinates[0].p.x = newS.p.x;
+                wholeShipCoordinates[0].p.y = newS.p.y;
                 shipHorizontalLength++;
                 shipVerticalLength++;
             }
 
-            newP.x = p.x - 1;
-            while (isWithinBoard(newP))
+            newS.p.x = s.p.x - 1;
+            while (isWithinBoard(newS.p))
             {
-                if (board[newP.x][newP.y] == SHIP_SIGN)
+                if (board[newS.p.x][newS.p.y] == SHIP_SIGN)
                 {
                     size++;
-                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-                    wholeShipCoordinates[size - 1].x = newP.x;
-                    wholeShipCoordinates[size - 1].y = newP.y;
+                    wholeShipCoordinates = (Ship *)realloc(wholeShipCoordinates, size * sizeof(Ship));
+                    wholeShipCoordinates[size - 1].p.x = newS.p.x;
+                    wholeShipCoordinates[size - 1].p.y = newS.p.y;
                     shipVerticalLength++;
                 }
                 else
                 {
                     break;
                 }
-                newP.x--;
+                newS.p.x--;
             }
 
-            newP.x = p.x + 1;
-            newP.y = p.y;
-            while (isWithinBoard(newP))
+            newS.p.x = s.p.x + 1;
+            newS.p.y = s.p.y;
+            while (isWithinBoard(newS.p))
             {
-                if (board[newP.x][newP.y] == SHIP_SIGN)
+                if (board[newS.p.x][newS.p.y] == SHIP_SIGN)
                 {
                     size++;
-                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-                    wholeShipCoordinates[size - 1].x = newP.x;
-                    wholeShipCoordinates[size - 1].y = newP.y;
+                    wholeShipCoordinates = (Ship *)realloc(wholeShipCoordinates, size * sizeof(Ship));
+                    wholeShipCoordinates[size - 1].p.x = newS.p.x;
+                    wholeShipCoordinates[size - 1].p.y = newS.p.y;
                     shipVerticalLength++;
                 }
                 else
                 {
                     break;
                 }
-                newP.x++;
+                newS.p.x++;
             }
 
-            newP.x = p.x;
-            newP.y = p.y + 1;
-            while (isWithinBoard(newP))
+            newS.p.x = s.p.x;
+            newS.p.y = s.p.y + 1;
+            while (isWithinBoard(newS.p))
             {
-                if (board[newP.x][newP.y] == SHIP_SIGN)
+                if (board[newS.p.x][newS.p.y] == SHIP_SIGN)
                 {
                     size++;
-                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-                    wholeShipCoordinates[size - 1].x = newP.x;
-                    wholeShipCoordinates[size - 1].y = newP.y;
+                    wholeShipCoordinates = (Ship *)realloc(wholeShipCoordinates, size * sizeof(Ship));
+                    wholeShipCoordinates[size - 1].p.x = newS.p.x;
+                    wholeShipCoordinates[size - 1].p.y = newS.p.y;
                     shipHorizontalLength++;
                 }
                 else
                 {
                     break;
                 }
-                newP.y++;
+                newS.p.y++;
             }
 
-            newP.x = p.x;
-            newP.y = p.y - 1;
-            while (isWithinBoard(newP))
+            newS.p.x = s.p.x;
+            newS.p.y = s.p.y - 1;
+            while (isWithinBoard(newS.p))
             {
-                if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+                if (board[newS.p.x][newS.p.y] == HIT_SHIP_SIGN)
                 {
                     size++;
-                    wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
-                    wholeShipCoordinates[size - 1].x = newP.x;
-                    wholeShipCoordinates[size - 1].y = newP.y;
+                    wholeShipCoordinates = (Ship *)realloc(wholeShipCoordinates, size * sizeof(Ship));
+                    wholeShipCoordinates[size - 1].p.x = newS.p.x;
+                    wholeShipCoordinates[size - 1].p.y = newS.p.y;
                     shipHorizontalLength++;
                 }
                 else
                 {
                     break;
                 }
-                newP.y--;
+                newS.p.y--;
             }
 
             int shipLength = 0;
@@ -852,14 +852,13 @@ void setAllShips(char **board)
             char filename[20];
             printf("Enter filename: ");
             scanf("%19[^\n]", filename);
-            printf("filename = %s\n", filename);
             board = readBoardFromFile(filename);
             if (board != NULL)
             {
                 break;
             }
             bool valid = checkBoardFromFile(board);
-            if (board == false)
+            if (valid == false)
             {
                 clearBoard(board);
                 setAllShips(board);
@@ -1461,12 +1460,12 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             {
                 printf("You hit a ship!\n");
                 playerHits = newPlayerHits;
-                pushback(rlist, 1, true, playerHit);
+                pushback(&rlist, 1, true, playerHit);
             }
             else
             {
                 printf("You missed it!\n");
-                pushback(rlist, 1, false, playerHit);
+                pushback(&rlist, 1, false, playerHit);
             }
         }
         else
@@ -1491,12 +1490,12 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             }
             if (computerHits == newComputerHits)
             {
-                pushback(rlist, 2, false, computerHit);
+                pushback(&rlist, 2, false, computerHit);
             }
             else
             {
                 computerHits = newComputerHits;
-                pushback(rlist, 2, true, computerHit);
+                pushback(&rlist, 2, true, computerHit);
             }
             if (isShipDestroyed(compSea, playerBoard, computerHit))
             {
