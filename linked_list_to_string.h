@@ -1,31 +1,6 @@
 #ifndef L_L_T_S_H
 #define L_L_T_S_H
-
-typedef struct Point
-{
-    int x;
-    int y;
-} Point;
-
-typedef struct Ship
-{
-    Point p;
-    char direction;
-} Ship;
-
-struct ReplayNode
-{
-    int player;
-    bool isHit;
-    Point point;
-    struct ReplayNode *next;
-};
-
-typedef struct
-{
-    struct ReplayNode *head;
-    int size;
-} ReplayList;
+#include "structures.h"
 
 // Node structure for generic linked list
 typedef struct Node

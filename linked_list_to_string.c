@@ -252,42 +252,42 @@ char *encrypt_linked_list(ReplayList *list)
     char *string_to_be_encrypted = list_to_string(list->head);
 }
 
-int main()
-{
-    ReplayList list = init();
-    Point p1 = {0, 0};
-    Point p2 = {1, 3};
-    Point p3 = {2, 5};
+// int main()
+// {
+//     ReplayList list = init();
+//     Point p1 = {0, 0};
+//     Point p2 = {1, 3};
+//     Point p3 = {2, 5};
 
-    pushback(&list, 1, true, p1);
-    pushback(&list, 2, false, p2);
-    pushback(&list, 1, true, p3);
+//     pushback(&list, 1, true, p1);
+//     pushback(&list, 2, false, p2);
+//     pushback(&list, 1, true, p3);
 
-    printf("Original ReplayList:\n");
-    printReplayList(&list);
+//     printf("Original ReplayList:\n");
+//     printReplayList(&list);
 
-    char *str = list_to_string(list.head);
-    if (str != NULL)
-    {
-        printf("String representation: %s\n", str);
+//     char *str = list_to_string(list.head);
+//     if (str != NULL)
+//     {
+//         printf("String representation: %s\n", str);
 
-        struct ReplayNode *new_head = string_to_list(str);
+//         struct ReplayNode *new_head = string_to_list(str);
 
-        printf("Reconstructed ReplayList:\n");
-        ReplayList new_list = init();
-        new_list.head = new_head;
-        new_list.size = list.size;
-        printReplayList(&new_list);
+//         printf("Reconstructed ReplayList:\n");
+//         ReplayList new_list = init();
+//         new_list.head = new_head;
+//         new_list.size = list.size;
+//         printReplayList(&new_list);
 
-        free(str);
-        free_replay_list(&new_list);
-    }
-    else
-    {
-        fprintf(stderr, "Conversion to string failed\n");
-    }
+//         free(str);
+//         free_replay_list(&new_list);
+//     }
+//     else
+//     {
+//         fprintf(stderr, "Conversion to string failed\n");
+//     }
 
-    free_replay_list(&list);
+//     free_replay_list(&list);
 
-    return 0;
-}
+//     return 0;
+// }

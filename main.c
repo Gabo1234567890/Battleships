@@ -24,9 +24,9 @@ int main()
         {
         case 1:
             printf("--------------------------------------------------RULES----------------------------------------------------\n");
-            printf("Battleship is a game for two people where you have to sink all enemy^s ships.\n");
+            printf("Battleship is a game for two people where you have to sink all enemy's ships.\n");
             printf("Both players have to place their ships on board. Every ship is surrounded by water (even on the corners).\n");
-            printf("When all ships are placed the game begin. Every player gives a guess in which enemy^s sell has a ship.\n");
+            printf("When all ships are placed the game begin. Every player gives a guess in which enemy's sell has a ship.\n");
             printf("The first player who finds all ships (whole ships) is the winner!\n");
             printf("------------------------------------------------------------------------------------------------------------\n");
             break;

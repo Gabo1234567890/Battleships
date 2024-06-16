@@ -1482,7 +1482,7 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             // SYSTEM
             // system(clear);
             system("cls");
-            pushback(rlist, 1, true, playerHit);
+            pushback(&rlist, 1, true, playerHit);
             printf("Computer board:\n");
             printBoard(compBoard);
             printf("Player's hits:\n");
@@ -1499,7 +1499,7 @@ ReplayList gamePvsComp(char **playerBoard, char **compBoard)
             // SYSTEM
             // system(clear);
             system("cls");
-            pushback(rlist, 2, true, computerHit);
+            pushback(&rlist, 2, true, computerHit);
             printf("Computer board:\n");
             printBoard(compBoard);
             printf("Player's hits:\n");
@@ -1560,5 +1560,5 @@ void replay(ReplayList rlist, char **board1, char **board2)
         currentnode = currentnode->next;
         sleep(1);
     }
-    freeReplayList(rlist);
+    freeReplayList(&rlist);
 }

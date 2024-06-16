@@ -1,5 +1,6 @@
 #ifndef BATTLESHIP_H
 #define BATTLESHIP_H
+#include "structures.h"
 
 #define BOARD_SIDE_SIZE 10
 

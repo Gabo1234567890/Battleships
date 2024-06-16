@@ -197,40 +197,40 @@ char *rsa_decrypt_string(long numbers[], KeysPair keys_pair)
     return decrypted_message;
 }
 
-int main()
-{
-    char word[100] = "kolko";
+// int main()
+// {
+//     char word[100] = "kolko";
 
-    KeysPair keys_pair = generate_public_and_private_keys(word);
-    printf("%d %d lll         ", keys_pair.priv_key, keys_pair.pub_key);
-    char word2[] = "1,1,0,0;2,0,1,3;1,1,2,5";
-    long *encrypted_numbers = rsa_encrypt_string(word2, keys_pair);
+//     KeysPair keys_pair = generate_public_and_private_keys(word);
+//     printf("%d %d lll         ", keys_pair.priv_key, keys_pair.pub_key);
+//     char word2[] = "1,1,0,0;2,0,1,3;1,1,2,5";
+//     long *encrypted_numbers = rsa_encrypt_string(word2, keys_pair);
 
-    if (encrypted_numbers == NULL)
-    {
-        fprintf(stderr, "Encryption failed.\n");
-        return 1;
-    }
+//     if (encrypted_numbers == NULL)
+//     {
+//         fprintf(stderr, "Encryption failed.\n");
+//         return 1;
+//     }
 
-    // Print encrypted numbers
-    printf("Encrypted numbers:\n");
-    for (int i = 0; i < strlen(word2); i++)
-    {
-        printf("%ld  ", encrypted_numbers[i]);
-    }
-    printf("\n");
+//     // Print encrypted numbers
+//     printf("Encrypted numbers:\n");
+//     for (int i = 0; i < strlen(word2); i++)
+//     {
+//         printf("%ld  ", encrypted_numbers[i]);
+//     }
+//     printf("\n");
 
-    char *decrypted_message = rsa_decrypt_string(encrypted_numbers, keys_pair);
-    if (decrypted_message == NULL)
-    {
-        fprintf(stderr, "Decryption failed.\n");
-        return 1;
-    }
+//     char *decrypted_message = rsa_decrypt_string(encrypted_numbers, keys_pair);
+//     if (decrypted_message == NULL)
+//     {
+//         fprintf(stderr, "Decryption failed.\n");
+//         return 1;
+//     }
 
-    printf("Decrypted Message: %s\n", decrypted_message);
+//     printf("Decrypted Message: %s\n", decrypted_message);
 
-    free(encrypted_numbers); // Free memory allocated in rsa_encrypt_string
-    free(decrypted_message); // Free memory allocated in rsa_decrypt_string
+//     free(encrypted_numbers); // Free memory allocated in rsa_encrypt_string
+//     free(decrypted_message); // Free memory allocated in rsa_decrypt_string
 
-    return 0;
-}
+//     return 0;
+// }
