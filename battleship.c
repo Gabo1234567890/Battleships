@@ -123,6 +123,15 @@ void printReplayList(ReplayList * list) {
   printf("\n");
 }
 
+
+void copyReplayList(ReplayList *dest, ReplayList *src) {
+  struct ReplayNode *currentnode = src->head;
+  while (currentnode != NULL) {
+    pushback(dest, currentnode->player, currentnode->x, currentnode->y, currentnode->aftermath);
+    currentnode = currentnode->next;
+  }
+}
+
 // WORKS
 char **setSea()
 {
@@ -689,10 +698,11 @@ int countShipSigns()
 }
 
 // IN PROCESS
-void gamePvsP(char **board1, char **board2)
+ReplayList gamePvsP(char **board1, char **board2)
 {
     char **sea1 = setSea();
     char **sea2 = setSea();
+    ReplayList rlist = init();
     bool end = false;
     Point p;
     int i = 1;
@@ -713,10 +723,12 @@ void gamePvsP(char **board1, char **board2)
             int newHits1 = isShipHit(sea1, board2, p, hits1, &i);
             if(hits1 < newHits1)
             {
+                pushback(&rlist, 1, p.x, p.y, "Hits");
                 printf("You hit a ship!\n");
             }
             else
             {
+                pushback(&rlist, 1, p.x, p.y, "Misses");
                 printf("You missed it!\n");
             }
             hits1 = newHits1;
@@ -733,10 +745,12 @@ void gamePvsP(char **board1, char **board2)
             int newHits2 = isShipHit(sea2, board1, p, hits2, &i);
             if(hits2 < newHits2)
             {
+                pushback(&rlist, 2, p.x, p.y, "Hits");
                 printf("You hit a ship!\n");
             }
             else
             {
+                pushback(&rlist, 2, p.x, p.y, "Misses");
                 printf("You missed it!\n");
             }
             hits2 = newHits2;
@@ -744,12 +758,12 @@ void gamePvsP(char **board1, char **board2)
         if (hits1 == countShipSigns())
         {
             printf("\n---------PLAYER 1 WINS----------\n");
-            return;
+            return rlist;
         }
         if (hits2 == countShipSigns())
         {
             printf("\n---------PLAYER 2 WINS---------\n");
-            return;
+            return rlist;
         }
         i++;
         // SLEEP
@@ -1098,20 +1112,16 @@ void gamePvsComp(char **playerBoard, char **compBoard)
 }
 
 //IN PROCCESS
-void replay(){
-    ReplayList rlist = init();
-    pushback(&rlist, 1, 6, 3, "Misses");
-    pushback(&rlist, 2, 5, 7, "Hits");
-    pushback(&rlist, 2, 5, 8, "Misses");
-    pushback(&rlist, 1, 3, 0, "Hits");
-    pushback(&rlist, 1, 3, 1, "Misses");
-    printReplayList(&rlist);
+void replay(ReplayList *rlist){
+    printReplayList(rlist);
 }
 
 int main()
 {
     char **board1 = setSea();
     char **board2 = setSea();
+    ReplayList rlist = init();
+    ReplayList templist = init();
 
     int choice = 0;
     printf("------------BATTLESHIP------------\n");
@@ -1140,7 +1150,7 @@ int main()
             setAllShips(board1);
             printf("Player 2 set ships:\n");
             setAllShips(board2);
-            gamePvsP(board1, board2);
+            rlist = gamePvsP(board1, board2);
             printf("hi\n");
             break;
 
@@ -1149,7 +1159,7 @@ int main()
             break;
         
         case 4:
-            replay();
+            replay(&rlist);
             break;
 
         default:
