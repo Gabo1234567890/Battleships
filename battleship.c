@@ -608,20 +608,194 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
     }
 }
 
+// TO DO
+bool checkBoardFromFile(char **board)
+{
+    int shipHorizontalLength = 0;
+    int shipVerticalLength = 0;
+    Point *wholeShipCoordinates = (Point *)malloc(sizeof(Point));
+    int size = 1;
+    Point newP;
+    newP.x = p.x;
+    newP.y = p.y;
+    bool destroyed = false;
+    if (isWithinBoard(newP) && board[newP.x][newP.y] == SHIP_SIGN)
+    {
+        wholeShipCoordinates[0].x = newP.x;
+        wholeShipCoordinates[0].y = newP.y;
+        shipHorizontalLength++;
+        shipVerticalLength++;
+    }
+
+    newP.x = p.x - 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            shipVerticalLength++;
+        }
+        else
+        {
+            break;
+        }
+        newP.x--;
+    }
+
+    newP.x = p.x + 1;
+    newP.y = p.y;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            shipVerticalLength++;
+        }
+        else
+        {
+            break;
+        }
+        newP.x++;
+    }
+
+    newP.x = p.x;
+    newP.y = p.y + 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == SHIP_SIGN)
+        {
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            shipHorizontalLength++;
+        }
+        else
+        {
+            break;
+        }
+        newP.y++;
+    }
+
+    newP.x = p.x;
+    newP.y = p.y - 1;
+    while (isWithinBoard(newP))
+    {
+        if (board[newP.x][newP.y] == HIT_SHIP_SIGN)
+        {
+            size++;
+            wholeShipCoordinates = (Point *)realloc(wholeShipCoordinates, size * sizeof(Point));
+            wholeShipCoordinates[size - 1].x = newP.x;
+            wholeShipCoordinates[size - 1].y = newP.y;
+            shipHorizontalLength++;
+        }
+        else
+        {
+            break;
+        }
+        newP.y--;
+    }
+
+    int shipLength = 0;
+    if((shipHorizontalLength > 1 && shipVerticalLength > 1) || shipHorizontalLength > GIGA_SHIP_LENGTH || shipVerticalLength > GIGA_SHIP_LENGTH)
+    {
+        printf("Invalid board! Your ships are too close to one another!\n");
+        return false;
+    }
+    else if(shipHorizontalLength > 1)
+    {
+        shipLength = shipHorizontalLength;
+    }
+    else
+    {
+        shipLength = shipVerticalLength;
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        isShipValid(board, wholeShipCoordinates[i], shipLength);
+        sea[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
+        board[wholeShipCoordinates[i].x][wholeShipCoordinates[i].y] = DESTROYED_SHIP_SIGN;
+    }
+}
+
+// WORKS
+char** readBoardFromFile(char *filename)
+{
+    char **board = setSea();
+    FILE *f;
+    f = fopen(filename, "r");
+    if(f == NULL)
+    {
+        printf("Can't open file!\n");
+        return NULL;
+    }
+    char line[BOARD_SIDE_SIZE + 2];
+    int i = 0;
+    while(fgets(line, BOARD_SIDE_SIZE + 2, f) != NULL)
+    {
+        if(strlen(line) > BOARD_SIDE_SIZE + 1 || i >= BOARD_SIDE_SIZE)
+        {
+            printf("Ivalid file!\n");
+            return NULL;
+        }
+        strcpy(board[i], line);
+        i++;
+    }
+
+    return board;
+}
+
 // WORKS
 void setAllShips(char **board)
 {
-    printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
-    setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH, true, true);
+    int choice = 0;
+    while(choice != 1 && choice != 2)
+    {
+        printf("1. Read from file\n");
+        printf("2. Set ships manually\n");
+        printf("Choice: ");
+        scanf("%d", &choice);
+        getchar();
+    }
 
-    // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH, false, false);
+    if(choice == 1)
+    {
+        while(1)
+        {
+            char filename[20];
+            printf("Enter filename: ");
+            scanf("%19[^\n]", filename);
+            printf("filename = %s\n", filename);
+            board = readBoardFromFile(filename);
+            printBoard(board);
+            if(board != NULL)
+            {
+                break;
+            }
+        }
+    }
 
-    // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH, false, false);
+    if(choice == 2)
+    {
+        printf("\nSET GIGA SHIPS (%d)\n", NUMBER_OF_GIGA_SHIPS);
+        setOneKindShips(board, NUMBER_OF_GIGA_SHIPS, GIGA_SHIP_LENGTH, true, true);
 
-    // printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
-    // setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH, false, true);
+        // printf("\nSET BIG SHIPS (%d)\n", NUMBER_OF_BIG_SHIPS);
+        // setOneKindShips(board, NUMBER_OF_BIG_SHIPS, BIG_SHIP_LENGTH, false, false);
+
+        // printf("\nSET MID SHIPS (%d)\n", NUMBER_OF_MID_SHIPS);
+        // setOneKindShips(board, NUMBER_OF_MID_SHIPS, MID_SHIP_LENGTH, false, false);
+
+        // printf("\nSET SMALL SHIPS (%d)\n", NUMBER_OF_SMALL_SHIPS);
+        // setOneKindShips(board, NUMBER_OF_SMALL_SHIPS, SMALL_SHIP_LENGTH, false, true);
+    }
 }
 
 // WORKS
@@ -785,7 +959,7 @@ int countShipSigns()
     return NUMBER_OF_SMALL_SHIPS * SMALL_SHIP_LENGTH + NUMBER_OF_MID_SHIPS * MID_SHIP_LENGTH + NUMBER_OF_BIG_SHIPS * BIG_SHIP_LENGTH + NUMBER_OF_GIGA_SHIPS * GIGA_SHIP_LENGTH;
 }
 
-// 
+// WORKS
 Point enterAdjacentHit(Point previousHit)
 {
     Point newHit;
@@ -1318,11 +1492,6 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         system("clear");
         // system("cls");
     }
-}
-
-// TO DO
-void readBoardFromFile(char **board, char *filename)
-{
 }
 
 // IN PROCCESS
