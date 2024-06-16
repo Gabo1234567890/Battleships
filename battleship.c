@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>
 //  SYSTEM
 //  SLEEP
 
@@ -566,6 +566,7 @@ void **setOneKindShips(char **board, int numberOfShips, int shipLength, bool fir
                     getchar();
                     if (moveShip(board, s1, s2) == true)
                     {
+                        i--;
                         break;
                     }
                 }
@@ -628,7 +629,11 @@ bool isShipDestroyed(char **sea, char **board, Point p)
 
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
-            destroyed = true;
+            destroyed = true && destroyed;
+        }
+        else
+        {
+            break;
         }
         newP.x--;
     }
@@ -649,7 +654,11 @@ bool isShipDestroyed(char **sea, char **board, Point p)
 
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
-            destroyed = true;
+            destroyed = true && destroyed;
+        }
+        else
+        {
+            break;
         }
         newP.x++;
     }
@@ -670,7 +679,11 @@ bool isShipDestroyed(char **sea, char **board, Point p)
 
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
-            destroyed = true;
+            destroyed = true && destroyed;
+        }
+        else
+        {
+            break;
         }
         newP.y++;
     }
@@ -691,7 +704,11 @@ bool isShipDestroyed(char **sea, char **board, Point p)
 
             wholeShipCoordinates[size - 1].x = newP.x;
             wholeShipCoordinates[size - 1].y = newP.y;
-            destroyed = true;
+            destroyed = true && destroyed;
+        }
+        else
+        {
+            break;
         }
         newP.y--;
     }
@@ -806,8 +823,8 @@ ReplayList gamePvsP(char **board1, char **board2)
         }
         i++;
         // SLEEP
-        // sleep(1);
-        Sleep(1000);
+        sleep(1);
+        //Sleep(1000);
     }
 }
 
@@ -1150,11 +1167,11 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         }
         turn++;
         // SLEEP
-        // sleep(2);
-        Sleep(2000);
+        sleep(2);
+        //Sleep(2000);
         // SYSTEM
-        // system("clear");
-        system("cls");
+        system("clear");
+        //system("cls");
     }
 }
 
