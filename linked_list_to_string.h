@@ -47,5 +47,6 @@ void insert_at_end(Node **head, const char *data);
 struct ReplayNode *string_to_list(const char *str);
 void free_list(Node *head);
 void free_replay_list(ReplayList *list);
+char *encrypt_linked_list(ReplayList *list);
 
 #endif
