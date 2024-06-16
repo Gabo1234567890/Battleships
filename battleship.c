@@ -1296,8 +1296,9 @@ void smartComp(Point *hit, Point alrHit, int hitParts)
 }
 
 // IN PROCESS
-void gamePvsComp(char **playerBoard, char **compBoard)
+ReplayList gamePvsComp(char **playerBoard, char **compBoard)
 {
+    ReplayList rlist = init();
     char **playerSea = setSea();
     char **compSea = setSea();
     bool end = false;
@@ -1321,12 +1322,16 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         if (turn % 2 == 0)
         {
             printf("Player's turn:\n");
+            // pushback(rlist, 1, true, hit); slagash go ako igracha udari
+            // pushback(rlist, 1, false, hit); slagash go ako igracha propusne
             enterCoordinates(&hit);
             playerHits = isShipHit(playerSea, compBoard, hit, playerHits, &turn);
         }
         else
         {
             printf("Computer's turn:\n");
+            // pushback(rlist, 2, false, hit); ako compa propusne
+            // pushback(rlist, 2, true, hit); ako compa udari
             if (!compFound)
             {
                 dumbComp(&hit);
@@ -1464,13 +1469,15 @@ void gamePvsComp(char **playerBoard, char **compBoard)
         }
         if (playerHits == countShipSigns())
         {
+            pushback(rlist, 1, true, hit);
             printf("\n---------PLAYER WINS---------");
-            return;
+            return rlist;
         }
         if (computerHits == countShipSigns())
         {
+            pushback(rlist, 2, true, hit);
             printf("\n---------COMPUTER WINS---------");
-            return;
+            return rlist;
         }
         turn++;
         // SLEEP
